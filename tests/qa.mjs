@@ -1,14 +1,14 @@
 /**
  * QA do site: screenshots, testes de interação e acessibilidade (axe).
  * Uso: com `npm run preview` rodando, execute `npm run qa`.
- * Variáveis: BASE (padrão http://localhost:4321) e OUT (pasta das imagens, padrão ./qa-output).
+ * Variáveis: BASE (padrão http://localhost:4321/entrelinhas) e OUT (pasta das imagens, padrão ./qa-output).
  */
 import { chromium } from 'playwright-core';
 import { AxeBuilder } from '@axe-core/playwright';
 import { mkdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-const BASE = process.env.BASE ?? 'http://localhost:4321';
+const BASE = process.env.BASE ?? 'http://localhost:4321/entrelinhas';
 const OUT = process.env.OUT ?? 'qa-output';
 const SHOTS = process.env.SHOTS !== '0';
 await mkdir(OUT, { recursive: true });

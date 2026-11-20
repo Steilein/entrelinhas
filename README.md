@@ -22,6 +22,7 @@ npm run dev        # abre o site em http://localhost:4321 e recarrega a cada alt
 npm run build      # gera a versão final na pasta dist/
 npm run preview    # mostra a versão final localmente
 npm run check      # confere erros de código e de conteúdo
+npm run deploy     # publica a versão atual no GitHub Pages
 ```
 
 ---
@@ -126,21 +127,30 @@ O botão "perto de mim" só funciona com o site publicado em **https** ou em `lo
 
 ## Publicar
 
-O site é estático. Escolha um destes caminhos:
-- **Netlify (mais simples):**
-  1. Rode `npm run build`.
-  2. Arraste a pasta `dist/` para [app.netlify.com/drop](https://app.netlify.com/drop).
-- **Netlify ou Vercel ligados ao GitHub:** a configuração é detectada sozinha (comando `npm run build`, pasta `dist`).
-- **GitHub Pages:** em `astro.config.mjs`, defina `site` com o seu endereço e `base: '/nome-do-repositorio'`.
+O site está publicado no **GitHub Pages**: https://steilein.github.io/entrelinhas/
+O código fica em https://github.com/Steilein/entrelinhas.
 
-Depois de publicar, ajuste `site` em `astro.config.mjs` e o endereço em `public/robots.txt` para o domínio final. Assim os links de compartilhamento e o sitemap saem certos.
+Para publicar uma nova versão depois de editar o conteúdo, rode:
+
+```sh
+npm run deploy
+```
+
+Esse comando gera o site e envia a pasta `dist/` para a branch `gh-pages`. Em cerca de 1 minuto, o GitHub Pages atualiza o endereço. Envie também o código-fonte (`git add`, `git commit`, `git push`) para manter o repositório em dia.
+
+> Por que não há deploy automático (GitHub Actions)? Em nov/2026 o Actions da conta estava bloqueado por uma pendência de cobrança no GitHub. Resolvida a pendência, dá para voltar ao deploy automático.
+
+**Para mudar de endereço** (domínio próprio, Netlify, Vercel):
+1. Ajuste `site` e `base` em `astro.config.mjs`. Num domínio próprio ou no Netlify, `base` volta a ser `'/'`.
+2. Atualize o endereço em `public/robots.txt`.
+3. No Netlify, basta arrastar a pasta `dist/` para [app.netlify.com/drop](https://app.netlify.com/drop).
 
 ---
 
 ## Testes automáticos
 
 ```sh
-npm run build && npm run preview   # deixe rodando num terminal
+npm run build && npm run preview   # deixe rodando num terminal (abre em /entrelinhas/)
 npm run qa                          # em outro terminal
 ```
 
