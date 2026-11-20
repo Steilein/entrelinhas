@@ -1,8 +1,9 @@
 ---
-/** Capa gerada de uma edição (proporção A6). Usada nas listagens e como capa do leitor. */
+/** Capa de uma edição no formato do livreto (10,5 × 14 cm). Usa a capa real quando existe; senão, desenha uma. */
 import Starburst from './Starburst.astro';
 import Wordmark from './Wordmark.astro';
 import { pad } from '../data/site';
+import { url } from '../lib/url';
 
 type Cor = 'magenta' | 'lima' | 'verde' | 'ciano' | 'azul' | 'preto';
 
@@ -11,10 +12,11 @@ interface Props {
   titulo: string;
   tema: string;
   cor: Cor;
+  capa?: string;
   class?: string;
 }
 
-const { numero, titulo, tema, cor, class: className } = Astro.props;
+const { numero, titulo, tema, cor, capa, class: className } = Astro.props;
 const destaque: Record<Cor, string> = {
   magenta: 'var(--lima)',
   lima: 'var(--magenta)',
@@ -33,6 +35,11 @@ const tituloBox: Record<Cor, string> = {
 };
 ---
 
+{capa ? (
+<div class:list={['cover', 'cover--real', className]}>
+  <img src={url(capa)} alt="" loading="lazy" decoding="async" />
+</div>
+) : (
 <div class:list={['cover', `bg-${cor}`, 'grain', `cover--n${numero % 3}`, className]}>
   <Starburst class="cover-star" seed={numero * 31} points={14 + numero} inner={0.4} jitter={0.28} fill={destaque[cor]} />
   <span class="cover-big" aria-hidden="true">{pad(numero)}</span>
@@ -48,15 +55,17 @@ const tituloBox: Record<Cor, string> = {
     </div>
   </div>
 </div>
+)}
 
 <style>
   .cover {
     container-type: inline-size;
     position: relative;
-    aspect-ratio: 1 / 1.414;
+    aspect-ratio: 3 / 4;
     width: 100%;
     overflow: hidden;
   }
+  .cover--real img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .cover-in {
     position: absolute;
     inset: 0;

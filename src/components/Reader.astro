@@ -9,6 +9,7 @@ import EditionCover from './EditionCover.astro';
 import Starburst from './Starburst.astro';
 import Wordmark from './Wordmark.astro';
 import { pad, site } from '../data/site';
+import { url } from '../lib/url';
 import type { Edicao } from '../lib/content';
 
 interface Props {
@@ -16,7 +17,7 @@ interface Props {
 }
 
 const { edicao } = Astro.props;
-const { numero, titulo, tema, cor, paginas, pdf } = edicao.data;
+const { numero, titulo, tema, cor, paginas, pdf, capa } = edicao.data;
 const total = paginas.length;
 
 // No YAML dobrado (>-) a linha em branco vira uma única quebra: transformamos em parágrafo.
@@ -33,7 +34,7 @@ const escuro = ['magenta', 'azul', 'preto'].includes(cor);
         return (
           <section class:list={['page', `page--${p.layout}`]} data-page={n} aria-label={`Página ${n} de ${total}`}>
             {p.layout === 'capa' && (
-              <EditionCover numero={numero} titulo={titulo} tema={tema} cor={cor} class="page-cover" />
+              <EditionCover numero={numero} titulo={titulo} tema={tema} cor={cor} capa={capa} class="page-cover" />
             )}
 
             {p.layout === 'texto' && (
@@ -78,7 +79,7 @@ const escuro = ['magenta', 'azul', 'preto'].includes(cor);
             )}
 
             {p.layout === 'imagem' && p.imagem && (
-              <img class="pg-img" src={p.imagem} alt={p.alt ?? ''} loading="lazy" />
+              <img class="pg-img" src={url(p.imagem)} alt={p.alt ?? ''} loading={n <= 3 ? 'eager' : 'lazy'} decoding="async" />
             )}
 
             {p.layout === 'contracapa' && (
@@ -118,7 +119,7 @@ const escuro = ['magenta', 'azul', 'preto'].includes(cor);
     </button>
     <div class="reader-extra">
       <button class="btn btn--sm btn--ghost" type="button" data-fs>tela cheia</button>
-      {pdf && <a class="btn btn--sm btn--magenta" href={pdf} download>baixar PDF</a>}
+      {pdf && <a class="btn btn--sm btn--magenta" href={url(pdf)} download>baixar PDF</a>}
     </div>
   </div>
   <p class="sr-only" aria-live="polite" data-live></p>
@@ -138,8 +139,10 @@ const escuro = ['magenta', 'azul', 'preto'].includes(cor);
     /* minmax(0, 1fr): sem isso o trilho cresce até a largura do conteúdo e não rola */
     grid-template-columns: minmax(0, 1fr);
     gap: 22px;
-    --pw: min(82cqw, 400px, calc(68vh / 1.414));
-    --ph: calc(var(--pw) * 1.414);
+    /* proporção do livreto: 10,5 × 14 cm */
+    --ratio: 1.3333;
+    --pw: min(82cqw, 400px, calc(68vh / var(--ratio)));
+    --ph: calc(var(--pw) * var(--ratio));
   }
 
   /* ---------- modo trilho (celular / sem JS) ---------- */
@@ -171,7 +174,7 @@ const escuro = ['magenta', 'azul', 'preto'].includes(cor);
 
   /* ---------- modo livro (desktop, ativado via JS) ---------- */
   .reader.is-book {
-    --pw: min(calc((100cqw - 40px) / 2), calc(min(74vh, 720px) / 1.414));
+    --pw: min(calc((100cqw - 40px) / 2), calc(min(74vh, 720px) / var(--ratio)));
   }
   .reader.is-book .reader-stage { perspective: 2600px; padding-block: 8px 12px; }
   .reader.is-book .reader-book {
@@ -261,9 +264,9 @@ const escuro = ['magenta', 'azul', 'preto'].includes(cor);
     color: var(--branco);
     align-content: center;
     padding: 24px;
-    --pw: min(84cqw, calc(84vh / 1.414));
+    --pw: min(84cqw, calc(84vh / var(--ratio)));
   }
-  .reader.is-book:fullscreen, .reader.is-book.is-fs { --pw: min(calc((100cqw - 60px) / 2), calc(84vh / 1.414)); }
+  .reader.is-book:fullscreen, .reader.is-book.is-fs { --pw: min(calc((100cqw - 60px) / 2), calc(84vh / var(--ratio))); }
   .reader.is-fs { position: fixed; inset: 0; z-index: 2000; }
   .reader:fullscreen .reader-bar, .reader.is-fs .reader-bar { background: rgb(255 255 255 / 0.2); }
   .reader:fullscreen .reader-btn, .reader.is-fs .reader-btn { background: var(--branco); color: var(--preto); }

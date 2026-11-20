@@ -2,7 +2,7 @@
 numero: 2
 titulo: "O trabalho que não se vê"
 tema: "Cuidado, trabalho doméstico e invisibilidade"
-lancamento: "out. 2026"
+lancamento: "dez. 2026"
 cor: "lima"
 chamada: "Lavar, cozinhar, cuidar, lembrar. Quem faz, e por que ninguém conta?"
 referencias:

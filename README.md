@@ -61,7 +61,8 @@ Cada ponto é um bloco assim:
 
 Há um arquivo por livreto. O cabeçalho (entre os `---`) traz os dados. O texto abaixo dele é a sinopse que aparece na página da edição.
 
-- **`cor`**: a cor da capa gerada. Valores: `magenta`, `lima`, `verde`, `ciano`, `azul` ou `preto`.
+- **`cor`**: a cor da capa gerada (e do topo da página da edição). Valores: `magenta`, `lima`, `verde`, `ciano`, `azul` ou `preto`.
+- **`capa`** (opcional): a imagem da capa real (ex.: `/edicoes/01/capa.webp`). Sem ela, o site desenha uma capa no formato do livreto (10,5 × 14 cm).
 - **`paginas`**: as páginas do livreto, na ordem. Cada página tem um `layout`:
 
   | layout | o que mostra | campos |
@@ -75,10 +76,14 @@ Há um arquivo por livreto. O cabeçalho (entre os `---`) traz os dados. O texto
   | `imagem` | uma página exportada do InDesign | `imagem` (ex.: `/edicoes/01/p05.jpg`), `alt` |
   | `contracapa` | contracapa com créditos | — |
 
-  Para usar as páginas reais do livreto, exporte cada página como JPG em proporção A6 e coloque os arquivos em `public/edicoes/01/`. Depois use o layout `imagem` em cada página.
+  A **edição 01** já usa as páginas reais. Os dois scripts abaixo leem o PDF original em `C:\Helena\Entrelinhas`:
+  - `tools/importar-material.py` exporta cada página como WebP em `public/edicoes/01/` e copia o PDF. Também gera as fotos, as peças e os logos dos parceiros.
+  - `tools/gerar-edicao-01.py` reescreve o arquivo da edição, com o texto alternativo de cada página lido do PDF.
+
+  Se o livreto mudar, rode `python tools/importar-material.py && python tools/gerar-edicao-01.py`. Para uma edição nova, siga o mesmo caminho (os scripts precisam de Python com `pymupdf` e `Pillow`).
 - **`pdf`** (opcional): o caminho de um PDF em `public/` (ex.: `/edicoes/01/livreto.pdf`). Quando preenchido, o leitor ganha o botão "baixar PDF".
 
-**Para virar o mês:** mude `edicaoAtual` em `src/data/site.ts`. As anteriores passam a "disponível" e as seguintes ficam "em breve".
+**Para virar o mês:** mude `edicaoAtual` em `src/data/site.ts`. As anteriores passam a "disponível" e as seguintes ficam "em breve". Hoje a edição do mês é a 01, a única com conteúdo real. As 02 a 06 aparecem como "em breve", com temas provisórios.
 
 ### Galeria: `src/data/galeria.json`
 
@@ -88,9 +93,13 @@ Hoje cada cartaz é desenhado pelo próprio site (campo `variante`). Para usar f
 
 O campo `ponto` precisa ser o `id` de um ponto do mapa. É ele que gera o botão "ver no mapa".
 
+### Ensaio fotográfico: `src/data/fotos.json`
+
+As fotos das peças aparecem na galeria, abaixo dos cartazes. Cada foto tem duas versões em `public/fotos/`: `NNNN.webp` (grande) e `NNNN-p.webp` (miniatura). No JSON, `formato: "retrato"` faz a foto ocupar duas linhas da grade, e `alt` é a descrição para quem usa leitor de tela.
+
 ### Parceiros: `src/data/parceiros.json`
 
-Logo: coloque o arquivo em `public/parceiros/` e preencha `"logo": "/parceiros/nome.png"`. Os campos `url` e `instagram` são opcionais e devem ser links completos (`https://...`).
+Logo: coloque o arquivo em `public/parceiros/` e preencha `"logo": "/parceiros/nome.png"`. Os três logos atuais foram recortados do fanzine, por isso têm fundo magenta. Os campos `url` e `instagram` são opcionais e devem ser links completos (`https://...`). Os textos `descricao` e `papel` ainda precisam ser confirmados com os coletivos.
 
 ### Informações gerais: `src/data/site.ts`
 
@@ -100,7 +109,7 @@ Aqui ficam Instagram, e-mail, créditos, as frases do letreiro e a edição do m
 
 ## Identidade visual
 
-As cores e as fontes ficam em variáveis no início de `src/styles/global.css`.
+As cores e as fontes ficam em variáveis no início de `src/styles/global.css`. O logotipo (`Wordmark.astro`) e o símbolo "e" (`LogoMark.astro`) são os vetores originais, extraídos da cinta e do fanzine.
 
 | cor | HEX | texto por cima |
 |---|---|---|

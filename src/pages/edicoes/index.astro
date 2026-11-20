@@ -33,7 +33,7 @@ const lancadas = edicoes.filter((e) => e.status !== 'em-breve').length;
         <li class:list={['ed-card', `ed-card--${e.status}`, 'reveal']}>
           <a href={url(`/edicoes/${e.id}`)} class="ed-link">
             <span class="ed-cover-wrap">
-              <EditionCover numero={e.data.numero} titulo={e.data.titulo} tema={e.data.tema} cor={e.data.cor} />
+              <EditionCover numero={e.data.numero} titulo={e.data.titulo} tema={e.data.tema} cor={e.data.cor} capa={e.data.capa} />
               {e.status === 'em-breve' && (
                 <span class="ed-veil">
                   <span>em breve</span>

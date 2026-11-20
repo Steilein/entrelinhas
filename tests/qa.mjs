@@ -120,7 +120,7 @@ for (const [kind] of Object.entries(viewports)) {
 /* ---------- leitor ---------- */
 for (const kind of ['desktop', 'mobile']) {
   const { ctx, page } = await newPage(kind, { reducedMotion: 'no-preference' });
-  await page.goto(`${BASE}/edicoes/01-ninguem-nasce-mulher`, { waitUntil: 'networkidle' });
+  await page.goto(`${BASE}/edicoes/01-o-feminino-nao-vem-de-fabrica`, { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
   const overflow = await page.evaluate(() =>
     Array.from(document.querySelectorAll('.page .pg')).flatMap((pg) => {
@@ -133,7 +133,8 @@ for (const kind of ['desktop', 'mobile']) {
   await page.keyboard.press('ArrowRight');
   await page.waitForTimeout(1000);
   const count = await page.textContent('[data-count]');
-  const esperado = kind === 'desktop' ? '2–3 / 10' : '2 / 10';
+  const total = await page.getAttribute('[data-reader]', 'data-total');
+  const esperado = kind === 'desktop' ? `2–3 / ${total}` : `2 / ${total}`;
   ok(`[${kind}] leitor: seta → avança`, count?.trim() === esperado, count ?? '');
   ok(`[${kind}] leitor: hash #p=2`, page.url().endsWith('#p=2'), page.url());
   if (kind === 'mobile') {
@@ -141,7 +142,7 @@ for (const kind of ['desktop', 'mobile']) {
     ok('[mobile] leitor: o trilho realmente rola', sl > 100, `scrollLeft ${sl}`);
   }
   if (SHOTS) await page.screenshot({ path: join(OUT, `${kind}-leitor-p2.png`) });
-  await page.goto(`${BASE}/edicoes/01-ninguem-nasce-mulher#p=6`, { waitUntil: 'networkidle' });
+  await page.goto(`${BASE}/edicoes/01-o-feminino-nao-vem-de-fabrica#p=6`, { waitUntil: 'networkidle' });
   await page.waitForTimeout(600);
   const c6 = await page.textContent('[data-count]');
   ok(`[${kind}] leitor: link direto #p=6`, !!c6?.includes('6'), c6 ?? '');

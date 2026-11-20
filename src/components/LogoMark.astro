@@ -25,16 +25,10 @@ const d = starburstPath({ seed, points: 14, inner: 0.5, jitter: 0.2 });
   focusable="false"
 >
   <g class="logomark-star"><path d={d} fill={star}></path></g>
-  <rect x="35" y="31" width="30" height="4" fill={ink}></rect>
-  <text x="50" y="61" text-anchor="middle" fill={ink} class="logomark-e">e</text>
-  <rect x="35" y="66" width="30" height="4" fill={ink}></rect>
+  <!-- o "e" entre duas linhas, vetor extraído do fanzine -->
+  <g fill={ink} transform="translate(-867.255 -360.937) scale(0.78732)"><path d="M1167.058 513.513C1171.254 514.379 1172.358 516.496 1171.867 520.323L1159.611 517.793C1160.675 514.085 1162.813 512.637 1167.058 513.513M1158.756 521.694L1177.021 525.464L1177.385 523.7C1179 515.878 1176.54 510.448 1168.147 508.716C1159.611 506.954 1154.483 511.564 1153.006 518.717L1152.711 520.148C1151.235 527.301 1153.88 533.515 1162.56 535.307C1170.761 537 1175.254 533.303 1176.45 528.23L1170.536 527.009L1170.341 527.715C1169.872 529.507 1167.867 531.032 1163.718 530.176C1159.092 529.221 1157.723 526.701 1158.668 522.123L1158.756 521.694"/><path d="M1142.679 499.907H1187.404V504.928H1142.679Z"/><path d="M1142.679 538.966H1187.404V543.987H1142.679Z"/></g>
 </svg>
 
 <style>
-  .logomark-e {
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: 36px;
-  }
   .logomark-star { transform-origin: 50% 50%; transform-box: fill-box; }
 </style>

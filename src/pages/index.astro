@@ -65,7 +65,7 @@ const linhas = [
       <span class="tile-label">edição digital</span>
       <span class="tile-text">nº {pad(atual.data.numero)}: {atual.data.titulo}. Leia online, página por página.</span>
       <span class="tile-cover" aria-hidden="true">
-        <EditionCover numero={atual.data.numero} titulo={atual.data.titulo} tema={atual.data.tema} cor={atual.data.cor} />
+        <EditionCover numero={atual.data.numero} titulo={atual.data.titulo} tema={atual.data.tema} cor={atual.data.cor} capa={atual.data.capa} />
       </span>
       <span class="tile-go" aria-hidden="true"><Arrow /></span>
     </a>
@@ -105,7 +105,7 @@ const linhas = [
     <div class="container destaque-grid">
       <a class="destaque-cover" href={url(`/edicoes/${atual.id}`)}>
         <span class="sr-only">Ler a edição {pad(atual.data.numero)} online</span>
-        <span class="destaque-art" aria-hidden="true"><EditionCover numero={atual.data.numero} titulo={atual.data.titulo} tema={atual.data.tema} cor={atual.data.cor} /></span>
+        <span class="destaque-art" aria-hidden="true"><EditionCover numero={atual.data.numero} titulo={atual.data.titulo} tema={atual.data.tema} cor={atual.data.cor} capa={atual.data.capa} /></span>
         <span class="destaque-badge" aria-hidden="true">
           <Starburst seed={50} points={16} fill="var(--lima)" spin />
           <span>edição<br />do mês</span>
@@ -139,7 +139,7 @@ const linhas = [
                 {e.status === 'em-breve' ? (
                   <span class="tl-soon" aria-hidden="true"><span>{pad(e.data.numero)}</span></span>
                 ) : (
-                  <EditionCover numero={e.data.numero} titulo={e.data.titulo} tema={e.data.tema} cor={e.data.cor} />
+                  <EditionCover numero={e.data.numero} titulo={e.data.titulo} tema={e.data.tema} cor={e.data.cor} capa={e.data.capa} />
                 )}
               </span>
               <span class="tl-title">{e.data.titulo}</span>
@@ -182,7 +182,7 @@ const linhas = [
           <a href={url(`/galeria#${g.id}`)}>
             <span class="sr-only">{g.data.titulo}. Lambe-lambe em {g.ponto.data.nome}</span>
             {g.data.imagem ? (
-              <img src={g.data.imagem} alt="" loading="lazy" />
+              <img src={url(g.data.imagem)} alt="" loading="lazy" />
             ) : (
               <Poster variante={g.data.variante} seed={i + 1} />
             )}
@@ -380,7 +380,7 @@ const linhas = [
   .tl-soon {
     display: grid;
     place-items: center;
-    aspect-ratio: 1 / 1.414;
+    aspect-ratio: 3 / 4;
     border: 2px dashed rgb(255 255 255 / 0.8);
     font-family: var(--font-display);
     font-weight: 900;

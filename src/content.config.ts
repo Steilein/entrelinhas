@@ -43,6 +43,8 @@ const edicoes = defineCollection({
     chamada: z.string(),
     referencias: z.array(z.string()).default([]),
     pdf: z.string().optional(),
+    /** Imagem da capa real (ex.: /edicoes/01/capa.webp). Sem ela, o site desenha a capa. */
+    capa: z.string().optional(),
     paginas: z.array(pagina).default([]),
   }),
 });

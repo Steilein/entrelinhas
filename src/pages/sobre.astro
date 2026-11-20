@@ -21,6 +21,33 @@ const numeros = [
   { n: String(expositores), label: 'expositores pela cidade', cor: 'preto' },
 ];
 
+const pecas = [
+  {
+    nome: 'Livreto',
+    img: '/fotos/9440-p.webp',
+    alt: 'Livreto da edição 01 com a cinta “O feminino não vem de fábrica”, segurado com as duas mãos.',
+    texto: '36 páginas em formato de bolso (10,5 × 14 cm): cinco capítulos, obras de arte, um glossário e um espaço para você responder.',
+  },
+  {
+    nome: 'Cinta',
+    img: '/pecas/cinta.webp',
+    alt: 'Cinta magenta com o título “O feminino não vem de fábrica” e a assinatura do entrelinhas.',
+    texto: 'Envolve o livreto e identifica a edição. A cada mês, uma cinta nova para a coleção.',
+  },
+  {
+    nome: 'Marcador',
+    img: '/pecas/marcador.webp',
+    alt: 'Marcador branco com a frase “Leia entrelinhas” em magenta e estrelas.',
+    texto: '“Leia entrelinhas”: vai junto com o livreto e continua circulando depois dele.',
+  },
+  {
+    nome: 'Fanzine',
+    img: '/pecas/fanzine.webp',
+    alt: 'Os oito painéis do fanzine, em lima, ciano e magenta, com as frases do projeto.',
+    texto: 'Uma folha dobrada em oito painéis que apresenta o projeto. Aberta, vira pôster.',
+  },
+];
+
 const faq = [
   {
     q: 'O livreto é mesmo gratuito?',
@@ -132,6 +159,23 @@ const faq = [
     </p>
   </section>
 
+  <section class="section container pecas" aria-labelledby="pecas-titulo">
+    <div class="pecas-head">
+      <p class="eyebrow">as peças</p>
+      <h2 id="pecas-titulo">Um kit para ler, guardar <span class="box box--magenta">e passar adiante.</span></h2>
+    </div>
+    <ul class="pecas-grid" role="list">
+      {pecas.map((p) => (
+        <li class="peca">
+          <div class="peca-img"><img src={url(p.img)} alt={p.alt} loading="lazy" decoding="async" /></div>
+          <h3>{p.nome}</h3>
+          <p>{p.texto}</p>
+        </li>
+      ))}
+    </ul>
+    <p class="pecas-mais"><a class="btn btn--ghost" href={url('/galeria#ensaio-titulo')}>ver o ensaio fotográfico <Arrow /></a></p>
+  </section>
+
   <section class="section parceiros-sec bg-cinza" id="parceiros" aria-labelledby="parc-titulo">
     <div class="container">
       <div class="parc-head">
@@ -172,6 +216,18 @@ const faq = [
 </Base>
 
 <style>
+  .pecas-head { display: grid; gap: 14px; margin-bottom: clamp(28px, 4vw, 48px); }
+  .pecas-head h2 { font-size: var(--step-4); line-height: 1.05; max-width: 18ch; }
+  .pecas-head h2 .box { line-height: 1.2; }
+  .pecas-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: clamp(20px, 3vw, 36px); }
+  .peca { display: grid; gap: 10px; align-content: start; }
+  .peca-img { aspect-ratio: 4 / 3; background: var(--cinza, #f0f0ec); display: grid; place-items: center; padding: 14px; border-radius: 4px; overflow: hidden; }
+  .peca-img img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .peca:first-child .peca-img { padding: 0; }
+  .peca:first-child .peca-img img { width: 100%; height: 100%; max-height: none; object-fit: cover; }
+  .peca h3 { font-size: var(--step-2); }
+  .peca p { font-weight: 300; line-height: 1.45; }
+  .pecas-mais { margin-top: clamp(24px, 3vw, 36px); }
   .sobre-hero { position: relative; overflow: hidden; border-bottom: 2px solid var(--preto); }
   .sobre-hero-inner { position: relative; z-index: 1; padding-block: clamp(64px, 11vw, 160px); }
   .sobre-hero h1 { font-size: clamp(2.5rem, 1rem + 6.4vw, 7.2rem); max-width: 16ch; letter-spacing: -0.045em; }

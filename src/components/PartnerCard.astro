@@ -1,5 +1,6 @@
 ---
 import Starburst from './Starburst.astro';
+import { url as caminho } from '../lib/url';
 import type { CollectionEntry } from 'astro:content';
 
 interface Props {
@@ -15,7 +16,7 @@ const fg = ['magenta', 'azul', 'preto'].includes(cor) ? 'var(--branco)' : 'var(-
 <article class:list={['partner', { 'partner--compact': compact }]}>
   <div class="partner-logo">
     {logo ? (
-      <img src={logo} alt={`Logo ${nome}`} loading="lazy" />
+      <img src={caminho(logo)} alt={`Logo ${nome}`} loading="lazy" />
     ) : (
       <div class="partner-badge" aria-hidden="true">
         <Starburst seed={ordem * 13} points={16} inner={0.62} jitter={0.12} fill={`var(--${cor})`} />
@@ -51,7 +52,7 @@ const fg = ['magenta', 'azul', 'preto'].includes(cor) ? 'var(--branco)' : 'var(-
   }
   .partner:hover { transform: translate(-3px, -3px); box-shadow: var(--shadow-hard); }
   .partner-logo { width: clamp(84px, 10vw, 110px); }
-  .partner-logo img { width: 100%; aspect-ratio: 1; object-fit: contain; }
+  .partner-logo img { width: 100%; aspect-ratio: 1; object-fit: contain; background: var(--magenta); border-radius: 10px; padding: 6px; }
   .partner-badge { position: relative; display: grid; place-items: center; }
   .partner-badge :global(svg) { width: 100%; grid-area: 1 / 1; }
   .partner-badge span {

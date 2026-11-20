@@ -2,7 +2,7 @@
 numero: 4
 titulo: "Quem fala por nós?"
 tema: "Voz, representação e lugar de fala"
-lancamento: "dez. 2026"
+lancamento: "fev. 2027"
 cor: "verde"
 chamada: "Quem tem microfone, quem tem palco, e quem sempre foi falado pelos outros?"
 referencias:

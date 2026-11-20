@@ -2,7 +2,7 @@
 numero: 3
 titulo: "Corpo, território"
 tema: "Corpo, padrões e autonomia"
-lancamento: "nov. 2026"
+lancamento: "jan. 2027"
 cor: "ciano"
 chamada: "Quem decide como um corpo deve ser, e quem lucra com isso?"
 referencias:

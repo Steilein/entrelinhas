@@ -2,7 +2,7 @@
 numero: 6
 titulo: "Por que não houve grandes mulheres artistas?"
 tema: "Arte, museu e representação"
-lancamento: "fev. 2027"
+lancamento: "abr. 2027"
 cor: "preto"
 chamada: "Nos museus, mulheres aparecem muito mais como modelos do que como autoras. Por quê?"
 referencias:

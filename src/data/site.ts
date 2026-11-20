@@ -7,7 +7,7 @@ export const site = {
   nome: 'entrelinhas',
   descricao:
     'Livretos gratuitos sobre as construções sociais do feminino, espalhados por Curitiba. Encontre um expositor no mapa, leia a edição digital e acompanhe a campanha nas ruas.',
-  edicaoAtual: 3,
+  edicaoAtual: 1,
   totalEdicoes: 6,
   cidade: 'Curitiba',
   instagram: {

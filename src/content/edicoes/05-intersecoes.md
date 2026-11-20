@@ -2,7 +2,7 @@
 numero: 5
 titulo: "Interseções"
 tema: "Gênero, raça e classe"
-lancamento: "jan. 2027"
+lancamento: "mar. 2027"
 cor: "azul"
 chamada: "Nenhuma opressão anda sozinha."
 referencias:

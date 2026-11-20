@@ -6,6 +6,7 @@
     "descricao": "Coletivo parceiro do entrelinhas. (Texto de apresentação a confirmar com o coletivo.)",
     "papel": "Apoio na produção e na distribuição dos livretos.",
     "cor": "magenta",
+    "logo": "/parceiros/coletivo-marianas.png",
     "ordem": 1
   },
   {
@@ -15,6 +16,7 @@
     "descricao": "Movimento feminista internacional, com atuação em diversas cidades brasileiras. (Texto a confirmar.)",
     "papel": "Diálogo sobre os temas das edições e circulação nos territórios.",
     "cor": "lima",
+    "logo": "/parceiros/marcha-mundial-das-mulheres.png",
     "ordem": 2
   },
   {
@@ -24,6 +26,7 @@
     "descricao": "Coletivo feminista parceiro do entrelinhas. (Texto de apresentação a confirmar com o coletivo.)",
     "papel": "Mobilização da campanha urbana e encaminhamento dos materiais.",
     "cor": "ciano",
+    "logo": "/parceiros/coletivo-juntas.png",
     "ordem": 3
   }
 ]

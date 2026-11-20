@@ -5,6 +5,7 @@ import Starburst from '../components/Starburst.astro';
 import { getGaleria } from '../lib/content';
 import { pad, site } from '../data/site';
 import { url } from '../lib/url';
+import fotos from '../data/fotos.json';
 
 const galeria = await getGaleria();
 const tilts = [-2.5, 1.8, -1.2, 2.6, -3, 1.2, 2.2, -1.8];
@@ -34,7 +35,7 @@ const tilts = [-2.5, 1.8, -1.2, 2.6, -3, 1.2, 2.2, -1.8];
             <span class="sr-only">Ampliar: {g.data.titulo}</span>
             <span class="cartaz-paper" aria-hidden="true">
               {g.data.imagem ? (
-                <img src={g.data.imagem} alt={g.data.alt ?? ''} loading="lazy" />
+                <img src={url(g.data.imagem)} alt={g.data.alt ?? ''} loading="lazy" />
               ) : (
                 <Poster variante={g.data.variante} seed={i + 1} />
               )}
@@ -53,9 +54,26 @@ const tilts = [-2.5, 1.8, -1.2, 2.6, -3, 1.2, 2.2, -1.8];
       ))}
     </ul>
     <p class="container muro-note">
-      {site.conteudoIlustrativo ? 'Os cartazes acima são reproduções digitais; as fotos da campanha na rua entram aqui assim que forem feitas.' : ''}
+      {site.conteudoIlustrativo ? 'Os cartazes acima são reproduções digitais; as fotos da campanha na rua entram aqui assim que os lambe-lambes forem colados.' : ''}
       Viu um lambe-lambe do entrelinhas? Fotografe e marque <a href={site.instagram.url} target="_blank" rel="noopener">{site.instagram.usuario}</a>.
     </p>
+  </section>
+
+  <section class="section container ensaio" aria-labelledby="ensaio-titulo">
+    <div class="ensaio-head">
+      <p class="eyebrow">ensaio · as peças impressas</p>
+      <h2 id="ensaio-titulo">Livreto, cinta, marcador e fanzine <span class="box box--lima">em mãos.</span></h2>
+      <p>O kit da edição 01 fotografado em uso. Clique numa foto para vê-la em tamanho grande.</p>
+    </div>
+    <ul class="ensaio-grid" role="list">
+      {fotos.map((f) => (
+        <li class:list={['ensaio-item', { 'ensaio-item--alto': f.formato === 'retrato' }]}>
+          <a href={url(`/fotos/${f.arquivo}.webp`)} target="_blank" rel="noopener">
+            <img src={url(`/fotos/${f.arquivo}-p.webp`)} alt={f.alt} loading="lazy" decoding="async" />
+          </a>
+        </li>
+      ))}
+    </ul>
   </section>
 
   <dialog class="lightbox" data-lightbox aria-label="Cartaz ampliado">
@@ -120,6 +138,17 @@ const tilts = [-2.5, 1.8, -1.2, 2.6, -3, 1.2, 2.2, -1.8];
   }
   .cartaz-btn:hover .cartaz-paper { transform: scale(1.03); }
   .cartaz-paper img { width: 100%; aspect-ratio: 1 / 1.414; object-fit: cover; }
+
+  .ensaio-head { display: grid; gap: 14px; max-width: 760px; margin-bottom: clamp(28px, 4vw, 48px); }
+  .ensaio-head h2 { font-size: var(--step-4); line-height: 1.05; }
+  .ensaio-head h2 .box { line-height: 1.2; }
+  .ensaio-head p:last-child { font-weight: 300; font-size: var(--step-1); line-height: 1.4; }
+  .ensaio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); grid-auto-rows: 220px; grid-auto-flow: dense; gap: 12px; }
+  .ensaio-item--alto { grid-row: span 2; }
+  .ensaio-item--alto img { object-position: center 70%; }
+  .ensaio-item a { display: block; height: 100%; overflow: hidden; border-radius: 4px; outline-offset: 3px; }
+  .ensaio-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s var(--ease-out); }
+  .ensaio-item a:hover img { transform: scale(1.04); }
   .cartaz-info { display: flex; justify-content: space-between; gap: 10px; font-family: var(--font-display); font-size: var(--step--1); }
   .cartaz-local { font-weight: 700; }
   .cartaz-local::before { content: '✶ '; color: var(--magenta); }
