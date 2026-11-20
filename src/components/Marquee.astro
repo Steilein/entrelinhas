@@ -1,0 +1,89 @@
+---
+import Starburst from './Starburst.astro';
+
+interface Props {
+  items: string[];
+  tone?: 'preto' | 'magenta' | 'lima';
+  speed?: number;
+}
+
+const { items, tone = 'preto', speed = 60 } = Astro.props;
+---
+
+<div class:list={['marquee', `marquee--${tone}`]} data-marquee style={`--dur:${speed}s`}>
+  <div class="marquee-track">
+    <ul class="marquee-group" role="list">
+      {items.map((t, i) => (
+        <li>
+          <span>{t}</span>
+          <Starburst class="marquee-star" seed={i + 2} points={14} />
+        </li>
+      ))}
+    </ul>
+    <ul class="marquee-group" role="list" aria-hidden="true">
+      {items.map((t, i) => (
+        <li>
+          <span>{t}</span>
+          <Starburst class="marquee-star" seed={i + 2} points={14} />
+        </li>
+      ))}
+    </ul>
+  </div>
+  <button type="button" class="marquee-toggle" aria-pressed="false" data-marquee-toggle>
+    <span class="sr-only">Pausar letreiro</span>
+    <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14" stroke="currentColor" stroke-width="3" stroke-linecap="round"></path></svg>
+    <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5l12 7-12 7z" fill="currentColor"></path></svg>
+  </button>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((m) => {
+    const btn = m.querySelector<HTMLButtonElement>('[data-marquee-toggle]');
+    btn?.addEventListener('click', () => {
+      const paused = m.classList.toggle('is-paused');
+      btn.setAttribute('aria-pressed', String(paused));
+      btn.querySelector('.sr-only')!.textContent = paused ? 'Continuar letreiro' : 'Pausar letreiro';
+    });
+  });
+</script>
+
+<style>
+  .marquee {
+    position: relative;
+    overflow: hidden;
+    padding-block: 18px;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: var(--step-2);
+    letter-spacing: -0.02em;
+    border-block: 2px solid var(--preto);
+  }
+  .marquee--preto { background: var(--preto); color: var(--lima); }
+  .marquee--magenta { background: var(--magenta); color: var(--branco); }
+  .marquee--lima { background: var(--lima); color: var(--preto); }
+  .marquee-track { display: flex; width: max-content; animation: marquee var(--dur) linear infinite; }
+  .marquee:hover .marquee-track, .marquee.is-paused .marquee-track { animation-play-state: paused; }
+  .marquee-group { display: flex; flex: none; }
+  .marquee-group li { display: flex; align-items: center; gap: 0.6em; padding-right: 0.6em; white-space: nowrap; }
+  .marquee :global(.marquee-star) { width: 1.1em; height: 1.1em; color: var(--magenta); flex: none; }
+  .marquee--magenta :global(.marquee-star) { color: var(--lima); }
+  @keyframes marquee { to { transform: translateX(-50%); } }
+  .marquee-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    translate: 0 -50%;
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--branco);
+    color: var(--preto);
+    border: 2px solid var(--preto);
+  }
+  .marquee-toggle svg { width: 16px; grid-area: 1 / 1; }
+  .i-play { display: none; }
+  .marquee.is-paused .i-play { display: block; }
+  .marquee.is-paused .i-pause { display: none; }
+</style>

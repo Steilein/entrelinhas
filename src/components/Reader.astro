@@ -1,0 +1,341 @@
+---
+/**
+ * Leitor folheável da edição digital.
+ * Sem JS ou no celular: trilho horizontal com scroll-snap (swipe nativo).
+ * No desktop (≥ 900px): livro com páginas que viram em 3D.
+ */
+import { marked } from 'marked';
+import EditionCover from './EditionCover.astro';
+import Starburst from './Starburst.astro';
+import Wordmark from './Wordmark.astro';
+import { pad, site } from '../data/site';
+import type { Edicao } from '../lib/content';
+
+interface Props {
+  edicao: Edicao;
+}
+
+const { edicao } = Astro.props;
+const { numero, titulo, tema, cor, paginas, pdf } = edicao.data;
+const total = paginas.length;
+
+// No YAML dobrado (>-) a linha em branco vira uma única quebra: transformamos em parágrafo.
+const md = (text = '') => marked.parse(text.replace(/\r?\n/g, '\n\n'), { async: false }) as string;
+const mdInline = (text = '') => marked.parseInline(text, { async: false }) as string;
+const escuro = ['magenta', 'azul', 'preto'].includes(cor);
+---
+
+<div class="reader" data-reader data-total={total} aria-roledescription="leitor de livreto" aria-label={`Edição ${pad(numero)}: ${titulo}`}>
+  <div class="reader-stage">
+    <div class="reader-book" data-book tabindex="0" aria-label="Páginas do livreto. Use as setas do teclado para folhear.">
+      {paginas.map((p, i) => {
+        const n = i + 1;
+        return (
+          <section class:list={['page', `page--${p.layout}`]} data-page={n} aria-label={`Página ${n} de ${total}`}>
+            {p.layout === 'capa' && (
+              <EditionCover numero={numero} titulo={titulo} tema={tema} cor={cor} class="page-cover" />
+            )}
+
+            {p.layout === 'texto' && (
+              <div class="pg pg--texto">
+                {p.titulo && <h3 class="pg-title">{p.titulo}</h3>}
+                <div class="pg-body" set:html={md(p.texto)} />
+              </div>
+            )}
+
+            {p.layout === 'citacao' && (
+              <div class:list={['pg', 'pg--citacao', `bg-${cor}`, 'grain']}>
+                <span class="pg-quote-mark" aria-hidden="true">“</span>
+                <blockquote>
+                  <p class="pg-quote">{p.texto}</p>
+                  {p.autor && <footer class="pg-author">{p.autor}</footer>}
+                </blockquote>
+              </div>
+            )}
+
+            {p.layout === 'pergunta' && (
+              <div class="pg pg--pergunta bg-preto">
+                <Starburst class="pg-star" seed={numero * 7 + n} points={15} fill="var(--magenta)" />
+                <p class="pg-question">{p.texto}</p>
+              </div>
+            )}
+
+            {p.layout === 'pautas' && (
+              <div class="pg pg--pautas">
+                {p.titulo && <h3 class="pg-title">{p.titulo}</h3>}
+                {p.texto && <p class="pg-prompt">{p.texto}</p>}
+                <div class="pg-lines rules" aria-hidden="true"></div>
+              </div>
+            )}
+
+            {p.layout === 'lista' && (
+              <div class="pg pg--lista">
+                {p.titulo && <h3 class="pg-title">{p.titulo}</h3>}
+                <ul>
+                  {(p.itens ?? []).map((item) => <li set:html={mdInline(item)} />)}
+                </ul>
+              </div>
+            )}
+
+            {p.layout === 'imagem' && p.imagem && (
+              <img class="pg-img" src={p.imagem} alt={p.alt ?? ''} loading="lazy" />
+            )}
+
+            {p.layout === 'contracapa' && (
+              <div class:list={['pg', 'pg--contracapa', `bg-${cor}`, 'grain']}>
+                <Wordmark class="pg-wm" star={escuro ? 'var(--lima)' : 'var(--magenta)'} />
+                <p class="pg-back-claim">Este livreto é gratuito.<br />Leia, questione, passe adiante.</p>
+                <div class="pg-colophon">
+                  <p>entrelinhas nº {pad(numero)}: {titulo}</p>
+                  <p>{site.instagram.usuario} · {site.email}</p>
+                  {site.conteudoIlustrativo && <p>Texto provisório, em desenvolvimento.</p>}
+                </div>
+              </div>
+            )}
+
+            {!['capa', 'contracapa', 'imagem'].includes(p.layout) && (
+              <footer class:list={['folio', { 'folio--claro': ['pergunta'].includes(p.layout) || (p.layout === 'citacao' && escuro) }]} aria-hidden="true">
+                <span>entrelinhas nº {pad(numero)}</span>
+                <span>{n}</span>
+              </footer>
+            )}
+          </section>
+        );
+      })}
+    </div>
+  </div>
+
+  <div class="reader-ui">
+    <button class="reader-btn" type="button" data-prev aria-label="Página anterior">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4l-8 8 8 8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+    </button>
+    <div class="reader-meter">
+      <span class="reader-count" data-count>1 / {total}</span>
+      <span class="reader-bar"><span data-progress style={`width:${100 / total}%`}></span></span>
+    </div>
+    <button class="reader-btn" type="button" data-next aria-label="Próxima página">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4l8 8-8 8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+    </button>
+    <div class="reader-extra">
+      <button class="btn btn--sm btn--ghost" type="button" data-fs>tela cheia</button>
+      {pdf && <a class="btn btn--sm btn--magenta" href={pdf} download>baixar PDF</a>}
+    </div>
+  </div>
+  <p class="sr-only" aria-live="polite" data-live></p>
+</div>
+
+<script>
+  import { initReaders } from '../scripts/reader';
+  initReaders();
+</script>
+
+<style>
+  .reader {
+    --gap: 16px;
+    container-type: inline-size;
+    position: relative;
+    display: grid;
+    /* minmax(0, 1fr): sem isso o trilho cresce até a largura do conteúdo e não rola */
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+    --pw: min(82cqw, 400px, calc(68vh / 1.414));
+    --ph: calc(var(--pw) * 1.414);
+  }
+
+  /* ---------- modo trilho (celular / sem JS) ---------- */
+  .reader-stage { min-width: 0; }
+  .reader-book {
+    display: flex;
+    min-width: 0;
+    gap: var(--gap);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    padding: 6px calc(50cqw - var(--pw) / 2) 18px;
+    scrollbar-width: thin;
+    overscroll-behavior-x: contain;
+    border-radius: 4px;
+  }
+  .page {
+    position: relative;
+    flex: 0 0 var(--pw);
+    width: var(--pw);
+    height: var(--ph);
+    scroll-snap-align: center;
+    container-type: size;
+    overflow: hidden;
+    background: var(--branco);
+    color: var(--preto);
+    box-shadow: 0 1px 0 rgb(0 0 0 / 0.08), 0 16px 40px -18px rgb(0 0 0 / 0.45);
+  }
+
+  /* ---------- modo livro (desktop, ativado via JS) ---------- */
+  .reader.is-book {
+    --pw: min(calc((100cqw - 40px) / 2), calc(min(74vh, 720px) / 1.414));
+  }
+  .reader.is-book .reader-stage { perspective: 2600px; padding-block: 8px 12px; }
+  .reader.is-book .reader-book {
+    position: relative;
+    display: block;
+    overflow: visible;
+    padding: 0;
+    width: calc(var(--pw) * 2);
+    height: var(--ph);
+    margin-inline: auto;
+    transform-style: preserve-3d;
+    transition: transform 0.7s var(--ease-out);
+    cursor: pointer;
+  }
+  .reader.is-book .reader-book[data-pos='start'] { transform: translateX(-25%); }
+  .reader.is-book .reader-book[data-pos='end'] { transform: translateX(25%); }
+  .reader :global(.leaf) {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 50%;
+    height: 100%;
+    transform-origin: left center;
+    transform-style: preserve-3d;
+    transition: transform 0.85s cubic-bezier(0.645, 0.045, 0.355, 1);
+  }
+  .reader :global(.leaf.is-flipped) { transform: rotateY(-180deg); }
+  .reader :global(.face) {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    overflow: hidden;
+    background: var(--branco);
+  }
+  .reader :global(.face--back) { transform: rotateY(180deg); }
+  .reader :global(.face .page) { width: 100%; height: 100%; box-shadow: none; }
+  .reader :global(.face::after) {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .reader :global(.face--front::after) { background: linear-gradient(to right, rgb(0 0 0 / 0.18), transparent 7%); }
+  .reader :global(.face--back::after) { background: linear-gradient(to left, rgb(0 0 0 / 0.18), transparent 7%); }
+  .reader.is-book .reader-book::before {
+    content: '';
+    position: absolute;
+    inset: 4% 2% -3%;
+    background: rgb(0 0 0 / 0.35);
+    filter: blur(26px);
+    transform: translateZ(-1px);
+    z-index: -1;
+  }
+
+  /* ---------- controles ---------- */
+  .reader-ui {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 14px 18px;
+  }
+  .reader-btn {
+    width: 52px;
+    height: 52px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--preto);
+    color: var(--branco);
+    transition: transform 0.2s var(--ease-out), background 0.2s;
+  }
+  .reader-btn svg { width: 22px; }
+  .reader-btn:hover { background: var(--magenta); transform: scale(1.06); }
+  .reader-btn:disabled { opacity: 0.3; pointer-events: none; }
+  .reader-meter { display: grid; gap: 6px; justify-items: center; min-width: 120px; }
+  .reader-count { font-family: var(--font-display); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .reader-bar { display: block; width: 120px; height: 4px; background: rgb(0 0 0 / 0.12); border-radius: 4px; overflow: hidden; }
+  .reader-bar span { display: block; height: 100%; background: var(--magenta); transition: width 0.4s var(--ease-out); }
+  .reader-extra { display: flex; gap: 10px; }
+
+  /* ---------- tela cheia ---------- */
+  .reader:fullscreen, .reader.is-fs {
+    background: #111;
+    color: var(--branco);
+    align-content: center;
+    padding: 24px;
+    --pw: min(84cqw, calc(84vh / 1.414));
+  }
+  .reader.is-book:fullscreen, .reader.is-book.is-fs { --pw: min(calc((100cqw - 60px) / 2), calc(84vh / 1.414)); }
+  .reader.is-fs { position: fixed; inset: 0; z-index: 2000; }
+  .reader:fullscreen .reader-bar, .reader.is-fs .reader-bar { background: rgb(255 255 255 / 0.2); }
+  .reader:fullscreen .reader-btn, .reader.is-fs .reader-btn { background: var(--branco); color: var(--preto); }
+
+  /* ---------- conteúdo das páginas (tudo em cqi = largura da página) ---------- */
+  .pg { position: absolute; inset: 0; padding: 10cqi 9cqi 14cqi; display: flex; flex-direction: column; }
+  .page :global(.page-cover) { position: absolute; inset: 0; height: 100%; }
+  .pg-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 8.4cqi;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    margin-bottom: 6cqi;
+    padding-bottom: 3cqi;
+    border-bottom: 0.6cqi solid var(--magenta);
+    align-self: flex-start;
+  }
+  .pg-body { font-family: var(--font-text); font-weight: 300; font-size: 4.9cqi; line-height: 1.42; }
+  .pg-body :global(p + p) { margin-top: 0.8em; }
+  .pg-body :global(em) { font-style: italic; color: var(--magenta); font-weight: 400; }
+
+  .pg--citacao { justify-content: center; }
+  .pg-quote-mark {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 48cqi;
+    line-height: 0.6;
+    height: 0.4em;
+    opacity: 0.9;
+  }
+  .pg-quote { font-family: var(--font-display); font-weight: 800; font-size: 9.6cqi; line-height: 1.04; letter-spacing: -0.03em; }
+  .pg-author { margin-top: 7cqi; font-family: var(--font-text); font-size: 4.4cqi; line-height: 1.3; }
+
+  .pg--pergunta { justify-content: flex-end; overflow: hidden; }
+  .pg--pergunta :global(.pg-star) { position: absolute; width: 120cqi; right: -40cqi; top: -30cqi; }
+  .pg-question {
+    position: relative;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 13.5cqi;
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+    color: var(--lima);
+  }
+
+  .pg-prompt { font-family: var(--font-text); font-size: 5.2cqi; line-height: 1.35; font-weight: 300; }
+  .pg-lines { flex: 1; margin-top: 6cqi; --rule-gap: 9cqi; --rule-color: rgb(230 0 126 / 0.55); }
+
+  .pg--lista ul { display: grid; gap: 4.5cqi; padding-left: 1.1em; font-family: var(--font-text); font-size: 4.9cqi; line-height: 1.3; }
+  .pg--lista li::marker { color: var(--magenta); content: '✶  '; }
+  .pg--lista :global(em) { font-style: italic; font-weight: 600; }
+
+  .pg-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+  .pg--contracapa { justify-content: space-between; padding-bottom: 10cqi; }
+  .pg--contracapa :global(.pg-wm) { font-size: 15cqi; }
+  .pg-back-claim { font-family: var(--font-display); font-weight: 800; font-size: 8cqi; line-height: 1.08; letter-spacing: -0.02em; }
+  .pg-colophon { display: grid; gap: 1.4cqi; font-family: var(--font-display); font-size: 3.6cqi; font-weight: 500; }
+
+  .folio {
+    position: absolute;
+    left: 9cqi;
+    right: 9cqi;
+    bottom: 6cqi;
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-display);
+    font-size: 3.2cqi;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    opacity: 0.6;
+  }
+  .folio--claro { color: var(--branco); }
+</style>

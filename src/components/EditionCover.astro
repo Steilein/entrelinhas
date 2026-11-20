@@ -1,0 +1,102 @@
+---
+/** Capa gerada de uma edição (proporção A6). Usada nas listagens e como capa do leitor. */
+import Starburst from './Starburst.astro';
+import Wordmark from './Wordmark.astro';
+import { pad } from '../data/site';
+
+type Cor = 'magenta' | 'lima' | 'verde' | 'ciano' | 'azul' | 'preto';
+
+interface Props {
+  numero: number;
+  titulo: string;
+  tema: string;
+  cor: Cor;
+  class?: string;
+}
+
+const { numero, titulo, tema, cor, class: className } = Astro.props;
+const destaque: Record<Cor, string> = {
+  magenta: 'var(--lima)',
+  lima: 'var(--magenta)',
+  verde: 'var(--magenta)',
+  ciano: 'var(--magenta)',
+  azul: 'var(--lima)',
+  preto: 'var(--magenta)',
+};
+const tituloBox: Record<Cor, string> = {
+  magenta: 'box--branco',
+  lima: 'box--preto',
+  verde: 'box--branco',
+  ciano: 'box--branco',
+  azul: 'box--lima',
+  preto: 'box--lima',
+};
+---
+
+<div class:list={['cover', `bg-${cor}`, 'grain', `cover--n${numero % 3}`, className]}>
+  <Starburst class="cover-star" seed={numero * 31} points={14 + numero} inner={0.4} jitter={0.28} fill={destaque[cor]} />
+  <span class="cover-big" aria-hidden="true">{pad(numero)}</span>
+  <!-- o padding em cqi fica num wrapper: no próprio container ele seria medido pela viewport -->
+  <div class="cover-in">
+    <div class="cover-top">
+      <Wordmark class="cover-wm" />
+      <span class="cover-n">nº {pad(numero)}</span>
+    </div>
+    <div class="cover-bottom">
+      <p class="cover-title"><span class:list={['box', tituloBox[cor]]}>{titulo}</span></p>
+      <p class="cover-tema">{tema}</p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .cover {
+    container-type: inline-size;
+    position: relative;
+    aspect-ratio: 1 / 1.414;
+    width: 100%;
+    overflow: hidden;
+  }
+  .cover-in {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    padding: 8cqi;
+  }
+  .cover-top { position: relative; display: flex; justify-content: space-between; align-items: flex-start; }
+  .cover :global(.cover-wm) { font-size: 7.5cqi; }
+  .cover-n { font-family: var(--font-display); font-weight: 700; font-size: 6cqi; }
+  .cover :global(.cover-star) {
+    position: absolute;
+    width: 92cqi;
+    top: 20cqi;
+    left: 18cqi;
+    z-index: 0;
+  }
+  .cover--n1 :global(.cover-star) { left: -26cqi; top: 26cqi; }
+  .cover--n2 :global(.cover-star) { left: 30cqi; top: 10cqi; width: 80cqi; }
+  .cover-big {
+    position: absolute;
+    left: 6cqi;
+    top: 30cqi;
+    z-index: 1;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 58cqi;
+    line-height: 0.8;
+    letter-spacing: -0.07em;
+    color: inherit;
+    mix-blend-mode: normal;
+  }
+  .cover-bottom { position: relative; margin-top: auto; display: grid; gap: 3cqi; }
+  .cover-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 9.5cqi;
+    line-height: 1.16;
+    letter-spacing: -0.03em;
+  }
+  .cover-tema { font-family: var(--font-text); font-size: 5cqi; line-height: 1.25; font-weight: 400; }
+</style>

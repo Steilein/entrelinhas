@@ -1,0 +1,29 @@
+[
+  {
+    "id": "coletivo-marianas",
+    "nome": "Coletivo Marianas",
+    "sigla": "CM",
+    "descricao": "Coletivo parceiro do entrelinhas. (Texto de apresentação a confirmar com o coletivo.)",
+    "papel": "Apoio na produção e na distribuição dos livretos.",
+    "cor": "magenta",
+    "ordem": 1
+  },
+  {
+    "id": "marcha-mundial-das-mulheres",
+    "nome": "Marcha Mundial das Mulheres",
+    "sigla": "MMM",
+    "descricao": "Movimento feminista internacional, com atuação em diversas cidades brasileiras. (Texto a confirmar.)",
+    "papel": "Diálogo sobre os temas das edições e circulação nos territórios.",
+    "cor": "lima",
+    "ordem": 2
+  },
+  {
+    "id": "coletivo-juntas",
+    "nome": "Coletivo Juntas",
+    "sigla": "J",
+    "descricao": "Coletivo feminista parceiro do entrelinhas. (Texto de apresentação a confirmar com o coletivo.)",
+    "papel": "Mobilização da campanha urbana e encaminhamento dos materiais.",
+    "cor": "ciano",
+    "ordem": 3
+  }
+]

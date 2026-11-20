@@ -1,0 +1,133 @@
+---
+import { getCollection } from 'astro:content';
+import Wordmark from './Wordmark.astro';
+import Starburst from './Starburst.astro';
+import { url } from '../lib/url';
+import { site } from '../data/site';
+
+const parceiros = (await getCollection('parceiros')).sort((a, b) => a.data.ordem - b.data.ordem);
+---
+
+<footer class="site-footer bg-preto">
+  <div class="container">
+    <div class="footer-top">
+      <p class="footer-claim display">
+        <span class="box box--lima">Ideias não surgem do nada.</span><br />
+        <span class="box box--magenta">Conhecimento também não.</span>
+      </p>
+      <a class="btn btn--lima" href={url('/mapa')}>encontrar minha edição</a>
+    </div>
+
+    <div class="footer-grid">
+      <div>
+        <Wordmark size="clamp(2.2rem, 5vw, 3.2rem)" star="var(--lima)" />
+        <p class="footer-about">Livretos gratuitos sobre as construções sociais do feminino, espalhados por {site.cidade}.</p>
+      </div>
+      <nav aria-label="Rodapé">
+        <h2 class="footer-h">navegue</h2>
+        <ul role="list">
+          <li><a href={url('/mapa')}>mapa dos pontos</a></li>
+          <li><a href={url('/edicoes')}>edições</a></li>
+          <li><a href={url('/sobre')}>sobre o projeto</a></li>
+          <li><a href={url('/galeria')}>galeria de lambe-lambes</a></li>
+        </ul>
+      </nav>
+      <div>
+        <h2 class="footer-h">fale com a gente</h2>
+        <ul role="list">
+          <li><a href={site.instagram.url} target="_blank" rel="noopener">Instagram {site.instagram.usuario}</a></li>
+          <li><a href={`mailto:${site.email}`}>{site.email}</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2 class="footer-h">em parceria com</h2>
+        <ul role="list">
+          {parceiros.map((p) => <li>{p.data.nome}</li>)}
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>
+        Projeto de conclusão de curso em {site.credito.curso} ({site.credito.instituicao}) de {site.credito.autora}, {site.credito.ano}.
+      </p>
+      {site.conteudoIlustrativo && (
+        <p class="footer-note">Pontos, edições e imagens deste site são ilustrativos enquanto o projeto está em desenvolvimento.</p>
+      )}
+      <p class="footer-note">Mapa: © colaboradores do OpenStreetMap.</p>
+    </div>
+  </div>
+
+  <div class="footer-giant" aria-hidden="true">
+    <span>entrelinhas</span>
+    <Starburst class="footer-giant-star" seed={21} points={17} fill="var(--magenta)" spin />
+  </div>
+</footer>
+
+<style>
+  .site-footer { position: relative; overflow: hidden; padding-top: clamp(56px, 8vw, 110px); }
+  .footer-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 28px;
+    padding-bottom: clamp(40px, 6vw, 72px);
+    border-bottom: 1px solid rgb(255 255 255 / 0.2);
+  }
+  .footer-claim { font-size: var(--step-3); line-height: 1.22; }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1.4fr repeat(3, 1fr);
+    gap: 40px;
+    padding-block: clamp(40px, 6vw, 72px);
+  }
+  .footer-about { margin-top: 18px; max-width: 32ch; color: rgb(255 255 255 / 0.78); font-weight: 300; }
+  .footer-h {
+    font-size: var(--step--1);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--lima);
+    margin-bottom: 14px;
+    line-height: 1.2;
+  }
+  .footer-grid ul { display: grid; gap: 8px; font-family: var(--font-display); }
+  .footer-grid a { text-decoration: none; }
+  .footer-grid a:hover { text-decoration: underline; }
+  .footer-bottom {
+    display: grid;
+    gap: 6px;
+    padding-bottom: 28px;
+    font-size: var(--step--1);
+    color: rgb(255 255 255 / 0.75);
+    font-family: var(--font-display);
+  }
+  .footer-note { color: rgb(255 255 255 / 0.6); }
+  .footer-giant {
+    position: relative;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 19.5vw;
+    line-height: 0.75;
+    letter-spacing: -0.05em;
+    color: var(--magenta);
+    white-space: nowrap;
+    margin-bottom: -0.1em;
+    padding-left: 2vw;
+    user-select: none;
+  }
+  .footer-giant :global(.footer-giant-star) {
+    position: absolute;
+    right: 3vw;
+    top: -0.32em;
+    width: 0.5em;
+  }
+  @media (max-width: 860px) {
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    .footer-grid > :first-child { grid-column: 1 / -1; }
+  }
+  @media (max-width: 480px) {
+    .footer-grid { grid-template-columns: 1fr; }
+  }
+</style>

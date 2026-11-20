@@ -1,0 +1,71 @@
+---
+import Starburst from './Starburst.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  parceiro: CollectionEntry<'parceiros'>;
+  compact?: boolean;
+}
+
+const { parceiro, compact = false } = Astro.props;
+const { nome, sigla, descricao, papel, cor, url, instagram, logo, ordem } = parceiro.data;
+const fg = ['magenta', 'azul', 'preto'].includes(cor) ? 'var(--branco)' : 'var(--preto)';
+---
+
+<article class:list={['partner', { 'partner--compact': compact }]}>
+  <div class="partner-logo">
+    {logo ? (
+      <img src={logo} alt={`Logo ${nome}`} loading="lazy" />
+    ) : (
+      <div class="partner-badge" aria-hidden="true">
+        <Starburst seed={ordem * 13} points={16} inner={0.62} jitter={0.12} fill={`var(--${cor})`} />
+        <span style={`color:${fg}`}>{sigla}</span>
+      </div>
+    )}
+  </div>
+  <div class="partner-body">
+    <h3 class="partner-nome">{nome}</h3>
+    {!compact && <p class="partner-desc">{descricao}</p>}
+    <p class="partner-papel"><strong>No entrelinhas:</strong> {papel}</p>
+    {(url || instagram) && !compact && (
+      <p class="partner-links">
+        {url && <a href={url} target="_blank" rel="noopener">site</a>}
+        {instagram && <a href={instagram} target="_blank" rel="noopener">Instagram</a>}
+      </p>
+    )}
+  </div>
+</article>
+
+<style>
+  .partner {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 20px;
+    align-items: center;
+    padding: 22px;
+    border: 2px solid var(--preto);
+    border-radius: var(--radius);
+    background: var(--branco);
+    color: var(--preto);
+    transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
+  }
+  .partner:hover { transform: translate(-3px, -3px); box-shadow: var(--shadow-hard); }
+  .partner-logo { width: clamp(84px, 10vw, 110px); }
+  .partner-logo img { width: 100%; aspect-ratio: 1; object-fit: contain; }
+  .partner-badge { position: relative; display: grid; place-items: center; }
+  .partner-badge :global(svg) { width: 100%; grid-area: 1 / 1; }
+  .partner-badge span {
+    grid-area: 1 / 1;
+    position: relative;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 1.35rem;
+    letter-spacing: -0.03em;
+  }
+  .partner-nome { font-size: var(--step-1); line-height: 1.1; letter-spacing: -0.02em; }
+  .partner-desc { margin-top: 6px; font-weight: 300; line-height: 1.4; }
+  .partner-papel { margin-top: 8px; font-size: 0.95rem; line-height: 1.4; }
+  .partner-papel strong { font-family: var(--font-display); font-weight: 700; }
+  .partner-links { display: flex; gap: 14px; margin-top: 8px; font-family: var(--font-display); font-weight: 600; }
+  .partner--compact .partner-papel { font-weight: 300; }
+</style>

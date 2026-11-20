@@ -1,0 +1,161 @@
+---
+import Base from '../layouts/Base.astro';
+import Poster from '../components/Poster.astro';
+import Starburst from '../components/Starburst.astro';
+import { getGaleria } from '../lib/content';
+import { pad, site } from '../data/site';
+import { url } from '../lib/url';
+
+const galeria = await getGaleria();
+const tilts = [-2.5, 1.8, -1.2, 2.6, -3, 1.2, 2.2, -1.8];
+---
+
+<Base
+  title="Galeria"
+  description="Os lambe-lambes da campanha do entrelinhas nos muros de Curitiba. Veja cada cartaz e onde ele está no mapa."
+>
+  <section class="gal-hero bg-preto">
+    <div class="container gal-hero-inner">
+      <p class="eyebrow">galeria · a campanha</p>
+      <h1>Perguntas <span class="box box--magenta">coladas</span> na cidade.</h1>
+      <p class="gal-lead">
+        A campanha de lambe-lambes ocupa muros e painéis de {site.cidade} com as provocações de cada edição. Clique num cartaz para ampliar e ver onde ele está.
+      </p>
+      <a class="btn btn--lima" href={url('/mapa?tipo=lambe')}>ver os lambe-lambes no mapa</a>
+    </div>
+    <Starburst class="gal-star" seed={66} points={22} inner={0.3} jitter={0.45} fill="var(--magenta)" spin />
+  </section>
+
+  <section class="muro grain">
+    <ul class="muro-grid container" role="list" data-gallery>
+      {galeria.map((g, i) => (
+        <li class="cartaz" id={g.id} style={`--tilt:${tilts[i % tilts.length]}deg`}>
+          <button type="button" class="cartaz-btn" data-open={i}>
+            <span class="sr-only">Ampliar: {g.data.titulo}</span>
+            <span class="cartaz-paper" aria-hidden="true">
+              {g.data.imagem ? (
+                <img src={g.data.imagem} alt={g.data.alt ?? ''} loading="lazy" />
+              ) : (
+                <Poster variante={g.data.variante} seed={i + 1} />
+              )}
+            </span>
+          </button>
+          <div class="cartaz-info">
+            <p class="cartaz-local">{g.ponto.data.nome}</p>
+            {g.data.edicao && <p class="cartaz-ed">edição {pad(g.data.edicao)}</p>}
+          </div>
+          <template data-caption>
+            <p class="lb-title">{g.data.titulo}</p>
+            <p class="lb-local">{g.ponto.data.nome} · {g.ponto.data.bairro}{g.data.edicao ? ` · edição ${pad(g.data.edicao)}` : ''}</p>
+            <a class="btn btn--sm btn--lima" href={url(`/mapa?ponto=${g.ponto.id}`)}>ver no mapa</a>
+          </template>
+        </li>
+      ))}
+    </ul>
+    <p class="container muro-note">
+      {site.conteudoIlustrativo ? 'Os cartazes acima são reproduções digitais; as fotos da campanha na rua entram aqui assim que forem feitas.' : ''}
+      Viu um lambe-lambe do entrelinhas? Fotografe e marque <a href={site.instagram.url} target="_blank" rel="noopener">{site.instagram.usuario}</a>.
+    </p>
+  </section>
+
+  <dialog class="lightbox" data-lightbox aria-label="Cartaz ampliado">
+    <div class="lb-inner">
+      <div class="lb-media" data-lb-media></div>
+      <div class="lb-side">
+        <div class="lb-caption" data-lb-caption></div>
+        <div class="lb-nav">
+          <button type="button" class="lb-btn" data-lb-prev aria-label="Cartaz anterior">←</button>
+          <span class="lb-count" data-lb-count></span>
+          <button type="button" class="lb-btn" data-lb-next aria-label="Próximo cartaz">→</button>
+        </div>
+      </div>
+      <button type="button" class="lb-close" data-lb-close aria-label="Fechar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"></path></svg>
+      </button>
+    </div>
+  </dialog>
+
+  <script>
+    import { initLightbox } from '../scripts/lightbox';
+    initLightbox();
+  </script>
+</Base>
+
+<style>
+  .gal-hero { position: relative; overflow: hidden; }
+  .gal-hero-inner { position: relative; z-index: 1; padding-block: clamp(48px, 8vw, 120px); display: grid; gap: 20px; justify-items: start; }
+  .gal-hero h1 { font-size: var(--step-5); max-width: 13ch; }
+  .gal-hero h1 .box { line-height: 1.15; }
+  .gal-lead { max-width: 50ch; font-size: var(--step-1); line-height: 1.4; font-weight: 300; color: rgb(255 255 255 / 0.85); }
+  .gal-hero :global(.gal-star) { position: absolute; width: clamp(260px, 38vw, 560px); right: -10%; bottom: -30%; opacity: 0.95; }
+
+  .muro {
+    background-color: var(--muro);
+    background-image:
+      linear-gradient(90deg, rgb(0 0 0 / 0.04) 1px, transparent 1px),
+      linear-gradient(rgb(0 0 0 / 0.035) 1px, transparent 1px);
+    background-size: 120px 60px;
+    padding-block: clamp(56px, 8vw, 110px);
+  }
+  .muro-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: clamp(32px, 5vw, 64px) clamp(24px, 4vw, 48px); }
+  .cartaz { display: grid; gap: 14px; rotate: var(--tilt); transition: rotate 0.4s var(--ease-spring); }
+  .cartaz:hover { rotate: 0deg; }
+  .cartaz-btn { display: block; width: 100%; border-radius: 2px; }
+  .cartaz-paper {
+    position: relative;
+    display: block;
+    box-shadow: 0 1px 0 rgb(0 0 0 / 0.08), 0 22px 30px -18px rgb(0 0 0 / 0.6);
+    transition: transform 0.35s var(--ease-spring);
+  }
+  /* brilho de cola / papel amassado */
+  .cartaz-paper::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(115deg, rgb(255 255 255 / 0.22) 0%, transparent 18%, transparent 62%, rgb(255 255 255 / 0.14) 70%, transparent 78%),
+      linear-gradient(180deg, transparent 40%, rgb(0 0 0 / 0.06) 41%, transparent 43%);
+    mix-blend-mode: screen;
+  }
+  .cartaz-btn:hover .cartaz-paper { transform: scale(1.03); }
+  .cartaz-paper img { width: 100%; aspect-ratio: 1 / 1.414; object-fit: cover; }
+  .cartaz-info { display: flex; justify-content: space-between; gap: 10px; font-family: var(--font-display); font-size: var(--step--1); }
+  .cartaz-local { font-weight: 700; }
+  .cartaz-local::before { content: '✶ '; color: var(--magenta); }
+  .cartaz-ed { font-weight: 500; }
+  .muro-note { margin-top: clamp(40px, 6vw, 72px); font-weight: 300; max-width: 70ch; }
+  .muro-note a { font-weight: 600; }
+
+  .lightbox {
+    width: min(1040px, calc(100% - 24px));
+    max-height: calc(100dvh - 24px);
+    margin: auto;
+    padding: 0;
+    border: 2px solid var(--preto);
+    border-radius: var(--radius);
+    background: var(--branco);
+    overflow: auto;
+  }
+  .lightbox::backdrop { background: rgb(0 0 0 / 0.82); backdrop-filter: blur(4px); }
+  .lightbox[open] { animation: lb-in 0.35s var(--ease-spring); }
+  @keyframes lb-in { from { transform: scale(0.94); opacity: 0; } }
+  .lb-inner { position: relative; display: grid; grid-template-columns: minmax(0, 1.2fr) 1fr; }
+  .lb-media { padding: clamp(16px, 3vw, 32px); background: var(--muro); display: grid; place-items: center; }
+  .lb-media > :global(*) { width: min(100%, calc((100dvh - 120px) / 1.414)); box-shadow: 0 18px 40px -20px rgb(0 0 0 / 0.6); }
+  .lb-media :global(img) { aspect-ratio: 1 / 1.414; object-fit: cover; }
+  .lb-side { display: flex; flex-direction: column; justify-content: space-between; gap: 24px; padding: clamp(24px, 3vw, 40px); }
+  .lb-caption { display: grid; gap: 14px; justify-items: start; padding-right: 40px; }
+  .lb-caption :global(.lb-title) { font-family: var(--font-display); font-weight: 800; font-size: var(--step-3); line-height: 1.02; letter-spacing: -0.03em; }
+  .lb-caption :global(.lb-local) { font-weight: 300; }
+  .lb-nav { display: flex; align-items: center; gap: 14px; }
+  .lb-btn { width: 52px; height: 52px; border-radius: 50%; background: var(--preto); color: var(--branco); font-size: 1.4rem; font-family: var(--font-display); }
+  .lb-btn:hover { background: var(--magenta); }
+  .lb-count { font-family: var(--font-display); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .lb-close { position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; background: var(--branco); border: 2px solid var(--preto); }
+  .lb-close svg { width: 18px; }
+  @media (max-width: 760px) {
+    .lb-inner { grid-template-columns: 1fr; }
+    .lb-media > :global(*) { width: min(100%, 300px); }
+  }
+</style>

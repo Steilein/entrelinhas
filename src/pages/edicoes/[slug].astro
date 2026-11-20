@@ -1,0 +1,176 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Reader from '../../components/Reader.astro';
+import EditionCover from '../../components/EditionCover.astro';
+import ShareButtons from '../../components/ShareButtons.astro';
+import Arrow from '../../components/Arrow.astro';
+import { getEdicoes, getPontos, type EdicaoComStatus } from '../../lib/content';
+import { pad, rotuloStatus } from '../../data/site';
+import { url } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const edicoes = await getEdicoes();
+  return edicoes.map((edicao, i) => ({
+    params: { slug: edicao.id },
+    props: { edicao, anterior: edicoes[i - 1], proxima: edicoes[i + 1] },
+  }));
+}
+
+interface Props {
+  edicao: EdicaoComStatus;
+  anterior?: EdicaoComStatus;
+  proxima?: EdicaoComStatus;
+}
+
+const { edicao, anterior, proxima } = Astro.props;
+const { numero, titulo, tema, cor, chamada, lancamento, referencias, paginas } = edicao.data;
+const { Content } = await render(edicao);
+const pontos = (await getPontos()).filter((p) => p.data.tipo === 'expositor' && p.data.edicoes.includes(numero));
+const temLeitor = edicao.status !== 'em-breve' && paginas.length > 0;
+---
+
+<Base
+  title={`nº ${pad(numero)}: ${titulo}`}
+  description={`${chamada} Edição ${pad(numero)} do entrelinhas: ${tema}.`}
+  og={url(`/og/${edicao.id}.png`)}
+>
+  <section class:list={['ed-top', `bg-${cor}`, 'grain']}>
+    <div class="container ed-top-inner">
+      <nav class="crumbs" aria-label="Você está em">
+        <a href={url('/edicoes')}>edições</a> <span aria-hidden="true">/</span> <span>nº {pad(numero)}</span>
+      </nav>
+      <div class="ed-top-meta">
+        <span class:list={['ed-pill', `ed-pill--${edicao.status}`]}>{rotuloStatus[edicao.status]}</span>
+        <span>{lancamento}</span>
+      </div>
+      <h1>{titulo}</h1>
+      <p class="ed-tema">{tema}</p>
+    </div>
+  </section>
+
+  <section class="leitor-sec" aria-label="Edição digital">
+    <div class="container">
+      {temLeitor ? (
+        <Reader edicao={edicao} />
+      ) : (
+        <div class="em-breve">
+          <div class="em-breve-cover">
+            <EditionCover numero={numero} titulo={titulo} tema={tema} cor={cor} />
+          </div>
+          <div class="em-breve-text">
+            <p class="eyebrow">em breve · {lancamento}</p>
+            <p class="em-breve-claim">Esta edição ainda está sendo escrita.</p>
+            <p>Ela chega aos expositores e ao site em <strong>{lancamento}</strong>. Enquanto isso, leia as edições anteriores ou siga o entrelinhas para saber quando sair.</p>
+            <a class="btn btn--magenta" href={url('/edicoes')}>ver edições disponíveis <Arrow /></a>
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <section class="section--tight container sobre-ed">
+    <div class="sobre-ed-main">
+      <p class="eyebrow">sobre esta edição</p>
+      <p class="sobre-ed-chamada">{chamada}</p>
+      <div class="prose sinopse">
+        <Content />
+      </div>
+      <div class="share-wrap">
+        <p class="eyebrow">passe adiante</p>
+        <ShareButtons texto={`Leia “${titulo}”, edição ${pad(numero)} do entrelinhas:`} />
+      </div>
+    </div>
+
+    <aside class="sobre-ed-side">
+      {referencias.length > 0 && (
+        <div class="side-box">
+          <h2 class="side-h">referências</h2>
+          <ul role="list" class="refs">
+            {referencias.map((r) => <li>{r}</li>)}
+          </ul>
+        </div>
+      )}
+      <div class="side-box side-box--mapa">
+        <h2 class="side-h">onde encontrar o impresso</h2>
+        {pontos.length > 0 ? (
+          <ul role="list" class="onde">
+            {pontos.slice(0, 6).map((p) => (
+              <li><a href={url(`/mapa?ponto=${p.id}`)}>{p.data.nome}</a> <span>{p.data.bairro}</span></li>
+            ))}
+          </ul>
+        ) : (
+          <p class="onde-vazio">Os pontos desta edição aparecem aqui no lançamento.</p>
+        )}
+        <a class="btn btn--sm btn--magenta" href={url(`/mapa?edicao=${numero}`)}>ver no mapa ({pontos.length})</a>
+      </div>
+    </aside>
+  </section>
+
+  <nav class="container ed-nav" aria-label="Outras edições">
+    {anterior ? (
+      <a class="ed-nav-link" href={url(`/edicoes/${anterior.id}`)}>
+        <span class="ed-nav-dir">← anterior</span>
+        <span class="ed-nav-title">nº {pad(anterior.data.numero)}: {anterior.data.titulo}</span>
+      </a>
+    ) : <span></span>}
+    {proxima && (
+      <a class="ed-nav-link ed-nav-link--next" href={url(`/edicoes/${proxima.id}`)}>
+        <span class="ed-nav-dir">próxima →</span>
+        <span class="ed-nav-title">nº {pad(proxima.data.numero)}: {proxima.data.titulo}</span>
+      </a>
+    )}
+  </nav>
+</Base>
+
+<style>
+  .ed-top { border-bottom: 2px solid var(--preto); }
+  .ed-top-inner { padding-block: clamp(28px, 5vw, 64px) clamp(32px, 5vw, 64px); display: grid; gap: 12px; }
+  .crumbs { font-family: var(--font-display); font-weight: 600; font-size: var(--step--1); }
+  .crumbs a { text-underline-offset: 3px; }
+  .ed-top-meta { display: flex; align-items: center; gap: 12px; font-family: var(--font-display); font-weight: 600; }
+  .ed-pill { font-size: 0.8rem; font-weight: 700; padding: 0.28em 0.7em; border-radius: 999px; background: var(--preto); color: var(--branco); }
+  .ed-top h1 { font-size: clamp(2.4rem, 1.4rem + 5vw, 6.2rem); max-width: 16ch; letter-spacing: -0.045em; }
+  .ed-tema { font-size: var(--step-1); font-weight: 300; }
+
+  .leitor-sec { padding-block: clamp(32px, 5vw, 64px); background: var(--cinza); border-bottom: 2px solid var(--preto); overflow: hidden; }
+
+  .em-breve { display: grid; grid-template-columns: minmax(200px, 320px) 1fr; gap: clamp(28px, 5vw, 72px); align-items: center; }
+  .em-breve-cover { filter: grayscale(0.6); opacity: 0.9; rotate: -3deg; box-shadow: 10px 10px 0 var(--preto); }
+  .em-breve-text { display: grid; gap: 16px; justify-items: start; max-width: 48ch; font-weight: 300; }
+  .em-breve-claim { font-family: var(--font-display); font-weight: 800; font-size: var(--step-3); line-height: 1; letter-spacing: -0.03em; }
+
+  .sobre-ed { display: grid; grid-template-columns: 1.6fr 1fr; gap: clamp(32px, 6vw, 96px); }
+  .sobre-ed-main { display: grid; gap: 22px; align-content: start; }
+  .sobre-ed-chamada { font-family: var(--font-display); font-weight: 800; font-size: var(--step-3); line-height: 1.02; letter-spacing: -0.03em; }
+  .sinopse { font-size: var(--step-1); line-height: 1.5; }
+  .share-wrap { display: grid; gap: 10px; margin-top: 12px; }
+  .sobre-ed-side { display: grid; gap: 18px; align-content: start; }
+  .side-box { padding: 22px; border: 2px solid var(--preto); border-radius: var(--radius); display: grid; gap: 14px; }
+  .side-box--mapa { background: var(--lima); }
+  .side-h { font-family: var(--font-display); font-size: var(--step--1); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+  .refs { display: grid; gap: 10px; font-weight: 400; line-height: 1.35; }
+  .refs li { padding-left: 1.2em; position: relative; }
+  .refs li::before { content: '✶'; position: absolute; left: 0; color: var(--magenta); }
+  .onde { display: grid; gap: 8px; }
+  .onde li { display: flex; justify-content: space-between; gap: 10px; border-bottom: 1px solid rgb(0 0 0 / 0.2); padding-bottom: 8px; }
+  .onde a { font-family: var(--font-display); font-weight: 700; text-decoration: none; }
+  .onde a:hover { text-decoration: underline; }
+  .onde span { font-size: 0.9rem; font-weight: 300; }
+  .side-box .btn { justify-self: start; }
+
+  .ed-nav { display: flex; justify-content: space-between; gap: 16px; padding-bottom: clamp(56px, 8vw, 110px); }
+  .ed-nav-link { display: grid; gap: 4px; max-width: 46%; text-decoration: none; padding: 18px 20px; border: 2px solid var(--preto); border-radius: var(--radius); transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out); }
+  .ed-nav-link:hover { transform: translate(-3px, -3px); box-shadow: var(--shadow-hard); }
+  .ed-nav-link--next { text-align: right; margin-left: auto; }
+  .ed-nav-dir { font-family: var(--font-display); font-style: italic; font-weight: 600; color: var(--magenta); }
+  .ed-nav-title { font-family: var(--font-display); font-weight: 800; line-height: 1.1; }
+
+  @media (max-width: 860px) {
+    .em-breve { grid-template-columns: 1fr; justify-items: center; }
+    .em-breve-cover { width: min(260px, 70%); }
+    .sobre-ed { grid-template-columns: 1fr; }
+    .ed-nav { flex-direction: column; }
+    .ed-nav-link { max-width: none; }
+  }
+</style>

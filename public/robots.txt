@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://steilein.github.io/entrelinhas/sitemap-index.xml

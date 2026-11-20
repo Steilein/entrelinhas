@@ -1,0 +1,136 @@
+---
+/**
+ * "Ler nas entrelinhas": frases escondidas entre as linhas de um texto.
+ * Desktop: aparecem sob um holofote que segue o cursor.
+ * Celular: aparecem conforme a rolagem. Botão "revelar tudo" para todo mundo.
+ */
+interface Props {
+  linhas: { texto: string; oculto: string }[];
+}
+
+const { linhas } = Astro.props;
+---
+
+<div class="rl" data-reveal>
+  <div class="rl-base">
+    {linhas.map((l) => (
+      <>
+        <p class="rl-line">{l.texto}</p>
+        <p class="rl-hidden">{l.oculto}</p>
+      </>
+    ))}
+  </div>
+  <div class="rl-lens" aria-hidden="true">
+    {linhas.map((l) => (
+      <>
+        <p class="rl-line">{l.texto}</p>
+        <p class="rl-hidden">{l.oculto}</p>
+      </>
+    ))}
+  </div>
+</div>
+<div class="rl-ui">
+  <p class="rl-hint"><span class="rl-hint-hover">passe o cursor sobre o texto</span><span class="rl-hint-touch">role devagar</span> para ler nas entrelinhas</p>
+  <button type="button" class="btn btn--sm btn--ghost" data-reveal-all aria-pressed="false">revelar tudo</button>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => {
+    let frame = 0;
+    const move = (e: PointerEvent) => {
+      if (e.pointerType !== 'mouse') return;
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const r = el.getBoundingClientRect();
+        el.style.setProperty('--x', `${e.clientX - r.left}px`);
+        el.style.setProperty('--y', `${e.clientY - r.top}px`);
+      });
+    };
+    el.addEventListener('pointerenter', (e) => {
+      if (e.pointerType === 'mouse') el.classList.add('is-on');
+    });
+    el.addEventListener('pointermove', move);
+    el.addEventListener('pointerleave', () => el.classList.remove('is-on'));
+    const btn = el.parentElement?.querySelector<HTMLButtonElement>('[data-reveal-all]');
+    btn?.addEventListener('click', () => {
+      const all = el.classList.toggle('is-all');
+      btn.setAttribute('aria-pressed', String(all));
+      btn.textContent = all ? 'esconder de novo' : 'revelar tudo';
+    });
+  });
+</script>
+
+<style>
+  @property --r {
+    syntax: '<length>';
+    inherits: true;
+    initial-value: 0px;
+  }
+  .rl {
+    --r: 0px;
+    position: relative;
+    transition: --r 0.45s var(--ease-out);
+    cursor: crosshair;
+  }
+  .rl.is-on { --r: 150px; }
+  .rl-line, .rl-hidden { margin: 0; }
+  .rl-line {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: var(--step-4);
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    padding-bottom: 0.12em;
+    border-bottom: 2px solid var(--preto);
+  }
+  .rl-hidden {
+    font-family: var(--font-text);
+    font-style: italic;
+    font-weight: 400;
+    font-size: var(--step-2);
+    line-height: 1.2;
+    padding-block: 0.45em 0.55em;
+    padding-left: clamp(0px, 8vw, 120px);
+    color: rgb(0 0 0 / 0.07);
+    transition: color 0.4s;
+  }
+  .rl-lens {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at var(--x, -999px) var(--y, -999px), rgb(181 205 32 / 0.55) 0, rgb(181 205 32 / 0.55) calc(var(--r) * 0.92), transparent var(--r));
+    -webkit-mask-image: radial-gradient(circle at var(--x, -999px) var(--y, -999px), #000 0, #000 calc(var(--r) * 0.9), transparent var(--r));
+    mask-image: radial-gradient(circle at var(--x, -999px) var(--y, -999px), #000 0, #000 calc(var(--r) * 0.9), transparent var(--r));
+  }
+  .rl-lens .rl-line { color: transparent; border-color: transparent; }
+  .rl-lens .rl-hidden { color: var(--magenta); }
+  .rl.is-all .rl-base .rl-hidden { color: var(--magenta); }
+  .rl.is-all .rl-lens { display: none; }
+
+  .rl-ui { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 24px; }
+  .rl-hint { font-family: var(--font-display); font-style: italic; font-weight: 500; font-size: var(--step--1); }
+  .rl-hint-touch { display: none; }
+
+  /* telas de toque: revela conforme a rolagem */
+  @media (hover: none) {
+    .rl { cursor: auto; }
+    .rl-lens { display: none; }
+    .rl-hint-hover { display: none; }
+    .rl-hint-touch { display: inline; }
+    .rl-base .rl-hidden { color: var(--magenta); }
+    @supports (animation-timeline: view()) {
+      @media (prefers-reduced-motion: no-preference) {
+        .rl-base .rl-hidden {
+          animation: rl-show linear both;
+          animation-timeline: view();
+          animation-range: cover 20% cover 45%;
+        }
+      }
+    }
+  }
+  @keyframes rl-show {
+    from { color: rgb(0 0 0 / 0.07); }
+    to { color: var(--magenta); }
+  }
+  .rl.is-all .rl-base .rl-hidden { animation: none; }
+</style>

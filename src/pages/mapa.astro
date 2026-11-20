@@ -1,0 +1,319 @@
+---
+import Base from '../layouts/Base.astro';
+import PointCard from '../components/PointCard.astro';
+import Starburst from '../components/Starburst.astro';
+import { getPontos, getEdicoes } from '../lib/content';
+import { pad, site } from '../data/site';
+
+const pontos = await getPontos();
+const edicoes = await getEdicoes();
+const expositores = pontos.filter((p) => p.data.tipo === 'expositor').length;
+const lambes = pontos.length - expositores;
+
+const dados = pontos.map((p) => ({ id: p.id, ...p.data }));
+const json = JSON.stringify(dados).replace(/</g, '\\u003c');
+---
+
+<Base
+  title="Mapa"
+  description="Encontre o expositor mais perto de você e pegue seu livreto grátis do entrelinhas. Veja também onde estão os lambe-lambes da campanha em Curitiba."
+  bodyClass="page-mapa"
+>
+  <section class="mapa-app" data-mapa data-view="mapa">
+    <aside class="painel" aria-labelledby="mapa-titulo">
+      <div class="painel-head">
+        <p class="eyebrow">mapa · Curitiba</p>
+        <h1 id="mapa-titulo">Encontre sua <span class="box box--magenta">edição</span></h1>
+        <p class="painel-intro">
+          Livretos grátis em <strong>{expositores} expositores</strong> e a campanha de lambe-lambes em <strong>{lambes} pontos</strong> da cidade.
+        </p>
+        {site.conteudoIlustrativo && (
+          <p class="aviso" role="note">
+            <strong>Protótipo acadêmico:</strong> os pontos são ilustrativos e os livretos ainda não estão nesses locais.
+          </p>
+        )}
+
+        <div class="near">
+          <button type="button" class="btn btn--magenta btn--sm" data-near>
+            <svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18"><circle cx="12" cy="12" r="4" fill="currentColor"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2"></circle></svg>
+            perto de mim
+          </button>
+          <p class="geo-msg" data-geo-msg role="status"></p>
+        </div>
+
+        <div class="filtros">
+          <div class="chips" role="group" aria-label="Filtrar por tipo de ponto">
+            <button type="button" class="chip" data-tipo="todos" aria-pressed="true">tudo</button>
+            <button type="button" class="chip chip--magenta" data-tipo="expositor" aria-pressed="false">
+              <Starburst seed={5} points={12} fill="var(--magenta)" class="chip-star" /> livretos
+            </button>
+            <button type="button" class="chip chip--lima" data-tipo="lambe" aria-pressed="false">
+              <Starburst seed={8} points={12} fill="var(--lima)" class="chip-star chip-star--outline" /> lambe-lambes
+            </button>
+          </div>
+          <div class="chips chips--eds" role="group" aria-label="Filtrar por edição">
+            <button type="button" class="chip chip--sm" data-edicao="0" aria-pressed="true">todas</button>
+            {edicoes.map((e) => (
+              <button
+                type="button"
+                class="chip chip--sm"
+                data-edicao={e.data.numero}
+                aria-pressed="false"
+                disabled={e.status === 'em-breve'}
+                title={e.status === 'em-breve' ? `Edição ${pad(e.data.numero)}: em breve` : e.data.titulo}
+              >
+                {pad(e.data.numero)}
+              </button>
+            ))}
+          </div>
+          <label class="busca">
+            <span class="sr-only">Buscar por nome ou bairro</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"></circle><path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
+            <input type="search" placeholder="buscar por nome ou bairro" data-search autocomplete="off" />
+          </label>
+        </div>
+
+        <div class="view-toggle" role="group" aria-label="Modo de visualização">
+          <button type="button" data-view-btn="mapa" aria-pressed="true">ver mapa</button>
+          <button type="button" data-view-btn="lista" aria-pressed="false">ver lista</button>
+        </div>
+        <p class="contagem" data-count aria-live="polite">{pontos.length} pontos</p>
+      </div>
+
+      <ol class="lista" role="list" data-list>
+        {pontos.map((p) => <PointCard ponto={p} />)}
+      </ol>
+      <p class="vazio" data-empty hidden>Nenhum ponto com esses filtros. Que tal limpar a busca?</p>
+    </aside>
+
+    <div class="mapa-wrap">
+      <div class="mapa" data-map role="region" aria-label="Mapa interativo dos pontos. A lista ao lado traz as mesmas informações."></div>
+      <div class="legenda" aria-hidden="true">
+        <span><Starburst seed={5} points={12} fill="var(--magenta)" class="leg-star" /> expositor (livretos grátis)</span>
+        <span><Starburst seed={8} points={12} fill="var(--lima)" class="leg-star leg-star--outline" /> lambe-lambe (campanha)</span>
+      </div>
+      <div class="sheet" data-sheet hidden>
+        <button type="button" class="sheet-close" data-sheet-close aria-label="Fechar detalhes">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"></path></svg>
+        </button>
+        <div data-sheet-body></div>
+      </div>
+    </div>
+  </section>
+
+  <script type="application/json" id="pontos-data" set:html={json}></script>
+  <script>
+    import { initMap } from '../scripts/map';
+    initMap();
+  </script>
+</Base>
+
+<style>
+  .mapa-app {
+    display: grid;
+    grid-template-columns: minmax(340px, 430px) 1fr;
+    height: calc(100dvh - var(--header-h));
+    min-height: 560px;
+    border-bottom: 2px solid var(--preto);
+  }
+  .painel {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--cinza);
+    border-right: 2px solid var(--preto);
+    scrollbar-width: thin;
+  }
+  .painel-head {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: grid;
+    gap: 14px;
+    padding: 24px 20px 16px;
+    background: var(--cinza);
+    border-bottom: 1px solid rgb(0 0 0 / 0.12);
+  }
+  .painel-head h1 { font-size: clamp(2rem, 1.5rem + 1.8vw, 2.8rem); line-height: 1.05; }
+  .painel-intro { font-weight: 300; line-height: 1.4; }
+  .painel-intro strong { font-weight: 600; }
+  .aviso { font-family: var(--font-display); font-size: 0.85rem; line-height: 1.35; padding: 8px 12px; border: 2px dashed var(--magenta); border-radius: var(--radius-sm); background: var(--branco); }
+  .aviso strong { color: var(--magenta); }
+  .near { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+  .geo-msg { font-size: 0.92rem; line-height: 1.3; font-family: var(--font-display); }
+  .geo-msg:empty { display: none; }
+  .filtros { display: grid; gap: 10px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    padding: 0.4em 0.9em;
+    border-radius: 999px;
+    border: 2px solid var(--preto);
+    background: var(--branco);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: background 0.2s, color 0.2s;
+  }
+  .chip--sm { min-height: 36px; min-width: 44px; justify-content: center; padding: 0.3em 0.7em; font-size: 0.88rem; }
+  .chip[aria-pressed='true'] { background: var(--preto); color: var(--branco); }
+  .chip--magenta[aria-pressed='true'] { background: var(--magenta); border-color: var(--magenta); }
+  .chip--lima[aria-pressed='true'] { background: var(--lima); color: var(--preto); }
+  .chip:disabled { opacity: 0.35; cursor: not-allowed; border-style: dashed; }
+  .chip :global(.chip-star) { width: 18px; height: 18px; }
+  :global(.chip-star--outline path), :global(.leg-star--outline path) { stroke: var(--preto); stroke-width: 5; }
+  .busca {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 14px;
+    min-height: 46px;
+    border: 2px solid var(--preto);
+    border-radius: var(--radius-sm);
+    background: var(--branco);
+  }
+  .busca input { flex: 1; min-width: 0; border: 0; background: none; padding: 10px 0; font-family: var(--font-display); }
+  .busca input:focus { outline: none; }
+  .busca:focus-within { outline: 3px solid var(--magenta); outline-offset: 2px; }
+  .contagem { font-family: var(--font-display); font-weight: 700; font-size: 0.95rem; }
+  .lista { display: grid; gap: 12px; padding: 16px 20px 32px; }
+  .lista :global(.ponto[hidden]) { display: none; }
+  .vazio { padding: 0 20px 32px; font-family: var(--font-display); }
+  .view-toggle { display: none; }
+
+  .mapa-wrap { position: relative; min-height: 0; isolation: isolate; }
+  .mapa { position: absolute; inset: 0; background: #f2f1ee; z-index: 0; }
+  /* as "entrelinhas" sobre a cidade */
+  .mapa-wrap::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 450;
+    pointer-events: none;
+    background: repeating-linear-gradient(to bottom, transparent 0 55px, rgb(230 0 126 / 0.09) 55px 57px);
+  }
+  .legenda {
+    position: absolute;
+    left: 14px;
+    bottom: 26px;
+    z-index: 500;
+    display: grid;
+    gap: 6px;
+    padding: 10px 14px;
+    background: var(--branco);
+    border: 2px solid var(--preto);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  .legenda span { display: flex; align-items: center; gap: 8px; }
+  .legenda :global(.leg-star) { width: 20px; height: 20px; }
+
+  .sheet {
+    position: absolute;
+    right: 16px;
+    bottom: 26px;
+    z-index: 600;
+    width: min(380px, calc(100% - 32px));
+    padding: 22px 22px 20px;
+    background: var(--branco);
+    border: 2px solid var(--preto);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-hard);
+    animation: sheet-in 0.35s var(--ease-spring);
+  }
+  .sheet[hidden] { display: none; }
+  @keyframes sheet-in { from { transform: translateY(24px); opacity: 0; } }
+  .sheet-close { position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; }
+  .sheet-close:hover { background: var(--cinza); }
+  .sheet-close svg { width: 18px; }
+
+  @media (max-width: 860px) {
+    .mapa-app { display: flex; flex-direction: column; height: auto; min-height: 0; }
+    .painel { overflow: visible; border-right: 0; }
+    .painel-head { position: static; padding: 14px var(--gutter) 12px; gap: 10px; }
+    .painel-head h1 { font-size: 1.75rem; }
+    .painel-head .eyebrow, .painel-intro { display: none; }
+    .chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); }
+    .chip { flex: none; }
+    .view-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      padding: 4px;
+      border: 2px solid var(--preto);
+      border-radius: 999px;
+      background: var(--branco);
+    }
+    .view-toggle button {
+      min-height: 40px;
+      border-radius: 999px;
+      font-family: var(--font-display);
+      font-weight: 700;
+    }
+    .view-toggle button[aria-pressed='true'] { background: var(--preto); color: var(--branco); }
+    .lista { padding-inline: var(--gutter); }
+    .mapa-wrap { height: calc(100dvh - var(--header-h) - 24px); min-height: 440px; }
+    [data-view='mapa'] .lista, [data-view='mapa'] .vazio { display: none; }
+    [data-view='lista'] .mapa-wrap { display: none; }
+    .legenda { bottom: 16px; left: 10px; font-size: 0.78rem; padding: 8px 10px; }
+    .sheet { left: 10px; right: 10px; bottom: 10px; width: auto; }
+    .sheet:not([hidden]) ~ .legenda, .legenda:has(~ .sheet:not([hidden])) { display: none; }
+  }
+</style>
+
+<style is:global>
+  /* ---------- Leaflet: marcadores e controles na identidade ---------- */
+  .page-mapa .leaflet-container { font-family: var(--font-display); background: #f2f1ee; }
+  .page-mapa .tiles-base { filter: grayscale(1) contrast(0.88) brightness(1.08); }
+  .pin {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.3s var(--ease-spring);
+    filter: drop-shadow(0 3px 2px rgb(0 0 0 / 0.25));
+  }
+  .pin svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .pin--lambe path { stroke: var(--preto); stroke-width: 4; }
+  .pin:hover, .pin.is-active { transform: scale(1.3); }
+  .pin.is-active svg { animation: spin 8s linear infinite; }
+  .leaflet-marker-icon:focus-visible { outline: 3px solid var(--preto); outline-offset: 2px; border-radius: 50%; }
+  .leaflet-marker-icon.is-dim { opacity: 0.25; }
+  .pin-me {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--ciano);
+    border: 3px solid var(--branco);
+    box-shadow: 0 0 0 3px var(--preto);
+  }
+  .pin-me::after {
+    content: '';
+    position: absolute;
+    inset: -12px;
+    border-radius: 50%;
+    border: 3px solid var(--ciano);
+    animation: me-pulse 1.8s ease-out infinite;
+  }
+  @keyframes me-pulse { from { transform: scale(0.4); opacity: 1; } to { transform: scale(1.4); opacity: 0; } }
+  .page-mapa .leaflet-bar { border: 2px solid var(--preto); border-radius: var(--radius-sm); overflow: hidden; box-shadow: none; }
+  .page-mapa .leaflet-bar a { width: 40px; height: 40px; line-height: 38px; font-size: 20px; color: var(--preto); }
+  .page-mapa .leaflet-bar a:hover { background: var(--lima); }
+  .page-mapa .leaflet-control-attribution { font-size: 11px; background: rgb(255 255 255 / 0.85); }
+
+  /* conteúdo da ficha do ponto */
+  .sheet-tipo { display: inline-block; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.25em 0.6em; border-radius: 999px; }
+  .sheet-tipo--expositor { background: var(--magenta); color: var(--branco); }
+  .sheet-tipo--lambe { background: var(--lima); color: var(--preto); box-shadow: inset 0 0 0 1.5px var(--preto); }
+  .sheet-nome { margin: 10px 40px 6px 0; font-size: 1.6rem; line-height: 1.05; }
+  .sheet-info { font-family: var(--font-text); font-weight: 400; line-height: 1.4; }
+  .sheet-info + .sheet-info { margin-top: 2px; }
+  .sheet-desc { margin-top: 10px; font-family: var(--font-text); font-weight: 300; font-style: italic; }
+  .sheet-eds { margin-top: 10px; font-weight: 700; font-size: 0.9rem; }
+  .sheet-dist { color: var(--magenta); font-weight: 700; }
+  .sheet-acoes { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+</style>

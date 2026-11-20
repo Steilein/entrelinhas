@@ -1,0 +1,33 @@
+---
+import { starburstPath } from '../lib/starburst';
+
+interface Props {
+  seed?: number;
+  points?: number;
+  inner?: number;
+  jitter?: number;
+  /** cor de preenchimento (qualquer valor CSS, ex.: var(--magenta)) */
+  fill?: string;
+  class?: string;
+  /** gira devagar (respeita prefers-reduced-motion) */
+  spin?: boolean;
+  label?: string;
+  style?: string;
+}
+
+const { seed = 1, points = 16, inner = 0.48, jitter = 0.24, fill = 'currentColor', class: className, spin = false, label, style } = Astro.props;
+const d = starburstPath({ seed, points, inner, jitter });
+---
+
+<svg
+  class:list={['starburst', className, { 'spin-slow': spin }]}
+  style={style}
+  viewBox="0 0 100 100"
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+  focusable="false"
+>
+  <path d={d} fill={fill}></path>
+  <slot />
+</svg>

@@ -1,0 +1,14 @@
+[
+  { "id": "lambe-01", "titulo": "Ideias ganham forma. Perspectivas ganham mundo.", "variante": "ideias", "ponto": "largo-da-ordem", "edicao": 1 },
+  { "id": "lambe-02", "titulo": "Questionar o que parece inquestionável.", "variante": "questionar", "ponto": "rua-sao-francisco", "edicao": 1 },
+  { "id": "lambe-03", "titulo": "Nenhum conhecimento se constrói sozinho.", "variante": "nenhum", "ponto": "trajano-reis", "edicao": 1 },
+  { "id": "lambe-04", "titulo": "Conhecimento não precisa ficar preso a uma só forma.", "variante": "forma", "ponto": "praca-tiradentes", "edicao": 2 },
+  { "id": "lambe-05", "titulo": "Por que entrelinhas?", "variante": "porque", "ponto": "passeio-publico", "edicao": 2 },
+  { "id": "lambe-06", "titulo": "O que mais podemos descobrir quando mudamos o olhar?", "variante": "olhar", "ponto": "rua-sao-francisco", "edicao": 2 },
+  { "id": "lambe-07", "titulo": "Outras formas de pensar, criar e compartilhar conhecimento.", "variante": "explosao", "ponto": "boca-maldita", "edicao": 3 },
+  { "id": "lambe-08", "titulo": "Ideias não surgem do nada. Conhecimento também não.", "variante": "nada", "ponto": "praca-rui-barbosa", "edicao": 3 },
+  { "id": "lambe-09", "titulo": "Questionar o que parece inquestionável.", "variante": "questionar", "ponto": "rua-riachuelo", "edicao": 3 },
+  { "id": "lambe-10", "titulo": "Ideias ganham forma. Perspectivas ganham mundo.", "variante": "ideias", "ponto": "trajano-reis", "edicao": 3 },
+  { "id": "lambe-11", "titulo": "Por que entrelinhas?", "variante": "porque", "ponto": "largo-da-ordem", "edicao": 1 },
+  { "id": "lambe-12", "titulo": "Outras formas de pensar, criar e compartilhar conhecimento.", "variante": "explosao", "ponto": "praca-tiradentes", "edicao": 2 }
+]

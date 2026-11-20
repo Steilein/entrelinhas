@@ -1,0 +1,100 @@
+---
+import Base from '../../layouts/Base.astro';
+import EditionCover from '../../components/EditionCover.astro';
+import Starburst from '../../components/Starburst.astro';
+import Arrow from '../../components/Arrow.astro';
+import { getEdicoes } from '../../lib/content';
+import { pad, rotuloStatus, site } from '../../data/site';
+import { url } from '../../lib/url';
+
+const edicoes = await getEdicoes();
+const lancadas = edicoes.filter((e) => e.status !== 'em-breve').length;
+---
+
+<Base
+  title="Edições"
+  description="Seis edições, uma por mês: leia online os livretos do entrelinhas sobre as construções sociais do feminino."
+>
+  <section class="ed-hero bg-lima grain">
+    <div class="container ed-hero-inner">
+      <p class="eyebrow">edições</p>
+      <h1>Um livreto por mês. <span class="box box--preto">Seis meses.</span></h1>
+      <p class="ed-lead">
+        Cada edição parte de uma pergunta sobre as construções sociais do feminino e traz teóricas, artigos e provocações num formato de bolso. A versão impressa está nos <a href={url('/mapa')}>expositores</a>; aqui você lê a versão digital.
+      </p>
+      <p class="ed-count"><strong>{lancadas}</strong> de {site.totalEdicoes} edições já lançadas</p>
+    </div>
+    <Starburst class="ed-hero-star" seed={90} points={18} fill="var(--magenta)" spin />
+  </section>
+
+  <section class="section container">
+    <ol class="ed-grid" role="list">
+      {edicoes.map((e) => (
+        <li class:list={['ed-card', `ed-card--${e.status}`, 'reveal']}>
+          <a href={url(`/edicoes/${e.id}`)} class="ed-link">
+            <span class="ed-cover-wrap">
+              <EditionCover numero={e.data.numero} titulo={e.data.titulo} tema={e.data.tema} cor={e.data.cor} />
+              {e.status === 'em-breve' && (
+                <span class="ed-veil">
+                  <span>em breve</span>
+                  <span class="ed-veil-mes">{e.data.lancamento}</span>
+                </span>
+              )}
+            </span>
+            <span class="ed-meta">
+              <span class="ed-n">nº {pad(e.data.numero)} · {e.data.lancamento}</span>
+              <span class="ed-status">{rotuloStatus[e.status]}</span>
+            </span>
+            <span class="ed-title">{e.data.titulo}</span>
+            <span class="ed-chamada">{e.data.chamada}</span>
+            <span class="ed-cta">{e.status === 'em-breve' ? 'saiba mais' : 'ler online'} <Arrow /></span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </section>
+</Base>
+
+<style>
+  .ed-hero { position: relative; overflow: hidden; border-bottom: 2px solid var(--preto); }
+  .ed-hero-inner { position: relative; z-index: 1; padding-block: clamp(48px, 8vw, 110px); display: grid; gap: 18px; }
+  .ed-hero h1 { font-size: var(--step-5); max-width: 12ch; }
+  .ed-hero h1 .box { line-height: 1.15; }
+  .ed-lead { max-width: 52ch; font-size: var(--step-1); line-height: 1.4; font-weight: 300; }
+  .ed-lead a { font-weight: 600; }
+  .ed-count { font-family: var(--font-display); font-size: var(--step-0); }
+  .ed-hero :global(.ed-hero-star) { position: absolute; width: clamp(260px, 36vw, 520px); right: -6%; top: 50%; translate: 0 -50%; z-index: 0; }
+
+  .ed-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(28px, 4vw, 56px) clamp(20px, 3vw, 40px); }
+  .ed-link { display: grid; gap: 10px; text-decoration: none; }
+  .ed-cover-wrap { position: relative; display: block; box-shadow: 10px 10px 0 var(--preto); transition: transform 0.4s var(--ease-spring), box-shadow 0.4s var(--ease-out); }
+  .ed-link:hover .ed-cover-wrap { transform: translate(-4px, -6px) rotate(-1.5deg); box-shadow: 16px 16px 0 var(--preto); }
+  .ed-veil {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    text-align: center;
+    gap: 4px;
+    background: rgb(255 255 255 / 0.78);
+    backdrop-filter: blur(3px) grayscale(1);
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: var(--step-3);
+    letter-spacing: -0.03em;
+  }
+  .ed-veil-mes { font-size: var(--step-0); font-weight: 600; letter-spacing: 0; }
+  .ed-meta { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; }
+  .ed-n { font-family: var(--font-display); font-weight: 700; font-size: var(--step--1); text-transform: uppercase; letter-spacing: 0.06em; }
+  .ed-status { font-family: var(--font-display); font-size: 0.78rem; font-weight: 700; padding: 0.25em 0.65em; border-radius: 999px; background: var(--preto); color: var(--branco); }
+  .ed-card--atual .ed-status { background: var(--magenta); }
+  .ed-card--em-breve .ed-status { background: transparent; color: var(--preto); box-shadow: inset 0 0 0 1.5px currentColor; }
+  .ed-title { font-family: var(--font-display); font-weight: 800; font-size: var(--step-2); line-height: 1.02; letter-spacing: -0.03em; }
+  .ed-chamada { font-weight: 300; line-height: 1.4; }
+  .ed-cta { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-display); font-style: italic; font-weight: 700; color: var(--magenta); }
+  .ed-cta :global(.arrow) { width: 30px; transition: transform 0.25s var(--ease-out); }
+  .ed-link:hover .ed-cta :global(.arrow) { transform: translateX(6px); }
+
+  @media (max-width: 900px) { .ed-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .ed-grid { grid-template-columns: 1fr; padding-inline: 12px; } }
+</style>

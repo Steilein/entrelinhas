@@ -1,0 +1,44 @@
+---
+interface Props {
+  texto: string;
+  /** caminho a compartilhar; padrão: a página atual */
+  path?: string;
+}
+
+const { texto, path = Astro.url.pathname } = Astro.props;
+const link = new URL(path, Astro.site).toString();
+const whatsapp = `https://wa.me/?text=${encodeURIComponent(`${texto} ${link}`)}`;
+---
+
+<div class="share" data-share-box data-url={link} data-text={texto}>
+  <a class="btn btn--sm btn--lima" href={whatsapp} target="_blank" rel="noopener">enviar no WhatsApp</a>
+  <button type="button" class="btn btn--sm btn--ghost" data-copy>copiar link</button>
+  <button type="button" class="btn btn--sm btn--ghost" data-native hidden>compartilhar…</button>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-share-box]').forEach((box) => {
+    const url = box.dataset.url!;
+    const text = box.dataset.text!;
+    const copy = box.querySelector<HTMLButtonElement>('[data-copy]')!;
+    const native = box.querySelector<HTMLButtonElement>('[data-native]')!;
+    const share = navigator.share?.bind(navigator);
+    if (share) {
+      native.hidden = false;
+      native.addEventListener('click', () => share({ title: document.title, text, url }).catch(() => {}));
+    }
+    copy.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(url);
+        copy.textContent = 'link copiado!';
+      } catch {
+        prompt('Copie o link:', url);
+      }
+      setTimeout(() => (copy.textContent = 'copiar link'), 2000);
+    });
+  });
+</script>
+
+<style>
+  .share { display: flex; flex-wrap: wrap; gap: 10px; }
+</style>

@@ -1,0 +1,31 @@
+---
+import Base from '../layouts/Base.astro';
+import Starburst from '../components/Starburst.astro';
+import { url } from '../lib/url';
+---
+
+<Base title="Página não encontrada" description="Esta página ficou nas entrelinhas.">
+  <section class="nf bg-lima grain">
+    <div class="container nf-inner">
+      <p class="nf-code" aria-hidden="true">404</p>
+      <h1>Essa página ficou <span class="box box--magenta">nas entrelinhas.</span></h1>
+      <p class="nf-text">O endereço pode ter mudado ou nunca ter existido. Mas os livretos continuam por aí.</p>
+      <div class="nf-btns">
+        <a class="btn btn--magenta" href={url('/mapa')}>encontrar minha edição</a>
+        <a class="btn btn--branco" href={url('/')}>voltar ao início</a>
+      </div>
+    </div>
+    <Starburst class="nf-star" seed={404} points={20} inner={0.32} jitter={0.4} fill="var(--magenta)" spin />
+  </section>
+</Base>
+
+<style>
+  .nf { position: relative; overflow: hidden; min-height: calc(100dvh - var(--header-h)); display: grid; align-items: center; }
+  .nf-inner { position: relative; z-index: 1; display: grid; gap: 20px; justify-items: start; padding-block: 64px; }
+  .nf-code { font-family: var(--font-display); font-weight: 900; font-size: clamp(5rem, 18vw, 14rem); line-height: 0.8; letter-spacing: -0.06em; }
+  .nf h1 { font-size: var(--step-4); max-width: 14ch; }
+  .nf h1 .box { line-height: 1.15; }
+  .nf-text { font-size: var(--step-1); font-weight: 300; max-width: 40ch; }
+  .nf-btns { display: flex; flex-wrap: wrap; gap: 12px; }
+  .nf :global(.nf-star) { position: absolute; width: clamp(240px, 40vw, 600px); right: -8%; bottom: -16%; }
+</style>

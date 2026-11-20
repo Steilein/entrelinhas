@@ -1,0 +1,55 @@
+---
+/**
+ * Assinatura "entre / linhas": a linha atravessa entre as palavras e termina na estrela.
+ * O tamanho é controlado pelo font-size do elemento pai (ou pela prop `size`).
+ */
+import Starburst from './Starburst.astro';
+
+interface Props {
+  size?: string;
+  star?: string;
+  class?: string;
+  as?: 'span' | 'div';
+}
+
+const { size, star = 'currentColor', class: className } = Astro.props;
+---
+
+<span class:list={['wordmark', className]} style={size ? `font-size:${size}` : undefined} role="img" aria-label="entrelinhas">
+  <span class="wm-top" aria-hidden="true">entre</span>
+  <span class="wm-rule" aria-hidden="true">
+    <Starburst class="wm-star" seed={3} points={18} inner={0.42} jitter={0.18} fill={star} />
+  </span>
+  <span class="wm-bot" aria-hidden="true">linhas</span>
+</span>
+
+<style>
+  .wordmark {
+    display: inline-grid;
+    grid-template-columns: auto;
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 0.82;
+    color: inherit;
+    padding-right: 0.55em;
+  }
+  .wm-top { padding-left: 0.02em; }
+  .wm-bot { padding-left: 0.62em; }
+  .wm-rule {
+    position: relative;
+    display: block;
+    height: 0.075em;
+    margin: 0.09em 0 0.11em;
+    background: currentColor;
+    width: calc(100% + 0.3em);
+  }
+  :global(.wm-star) {
+    position: absolute;
+    right: -0.42em;
+    top: 50%;
+    width: 0.62em;
+    height: 0.62em;
+    translate: 0 -50%;
+  }
+</style>

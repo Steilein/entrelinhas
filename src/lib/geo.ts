@@ -1,0 +1,23 @@
+/** Distância em km entre dois pontos (fórmula de haversine). */
+export function distanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371;
+  const toRad = (v: number) => (v * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+export function formatDistance(km: number): string {
+  if (km < 1) return `a ${Math.round(km * 1000 / 10) * 10} m`;
+  return `a ${km.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} km`;
+}
+
+/** Normaliza texto para busca: minúsculas e sem acentos. */
+export function normalize(text: string): string {
+  return text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+}
+
+export function directionsUrl(lat: number, lng: number): string {
+  return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+}

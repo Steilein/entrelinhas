@@ -1,0 +1,103 @@
+---
+import { directionsUrl, normalize } from '../lib/geo';
+import { pad, site } from '../data/site';
+import type { Ponto } from '../lib/content';
+
+interface Props {
+  ponto: Ponto;
+}
+
+const { ponto } = Astro.props;
+const { nome, tipo, endereco, bairro, horario, edicoes, lat, lng } = ponto.data;
+const busca = normalize(`${nome} ${bairro} ${endereco}`);
+const todas = Array.from({ length: site.totalEdicoes }, (_, i) => i + 1);
+---
+
+<li
+  class:list={['ponto', `ponto--${tipo}`]}
+  data-id={ponto.id}
+  data-tipo={tipo}
+  data-edicoes={edicoes.join(',')}
+  data-busca={busca}
+>
+  <div class="ponto-head">
+    <span class="ponto-tipo">{tipo === 'expositor' ? 'livretos grátis' : 'lambe-lambe'}</span>
+    <span class="ponto-dist" data-dist></span>
+  </div>
+  <h3 class="ponto-nome">
+    <button type="button" class="ponto-btn" data-select={ponto.id}>{nome}</button>
+  </h3>
+  <p class="ponto-end">{endereco} · {bairro}</p>
+  <p class="ponto-hora">{horario}</p>
+  {edicoes.length > 0 && (
+    <p class="ponto-eds">
+      <span class="sr-only">{tipo === 'expositor' ? 'Edições disponíveis:' : 'Cartazes das edições:'} {edicoes.map(pad).join(', ')}</span>
+      <span class="eds" aria-hidden="true">
+        {todas.map((n) => <span class:list={['ed', { 'ed--on': edicoes.includes(n) }]}>{pad(n)}</span>)}
+      </span>
+    </p>
+  )}
+  <div class="ponto-acoes">
+    <a class="ponto-link" href={directionsUrl(lat, lng)} target="_blank" rel="noopener">como chegar <span aria-hidden="true">↗</span></a>
+    <button type="button" class="ponto-link" data-share={ponto.id} data-nome={nome}>compartilhar</button>
+  </div>
+</li>
+
+<style>
+  .ponto {
+    position: relative;
+    padding: 18px 18px 16px;
+    border-radius: var(--radius);
+    background: var(--branco);
+    border: 2px solid var(--preto);
+    transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out), background 0.2s;
+  }
+  .ponto:hover { transform: translate(-2px, -2px); box-shadow: var(--shadow-hard); }
+  .ponto.is-active { background: var(--lima); box-shadow: var(--shadow-hard); transform: translate(-2px, -2px); }
+  .ponto--expositor.is-active { background: #ffe3f2; }
+  .ponto-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .ponto-tipo {
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.25em 0.6em;
+    border-radius: 999px;
+  }
+  .ponto--expositor .ponto-tipo { background: var(--magenta); color: var(--branco); }
+  .ponto--lambe .ponto-tipo { background: var(--lima); color: var(--preto); box-shadow: inset 0 0 0 1.5px var(--preto); }
+  .ponto-dist { font-family: var(--font-display); font-weight: 700; font-size: 0.9rem; color: var(--magenta); }
+  .ponto-nome { font-size: 1.3rem; line-height: 1.1; letter-spacing: -0.02em; }
+  .ponto-btn { text-align: left; font-weight: inherit; letter-spacing: inherit; }
+  /* o card todo é clicável, exceto as ações */
+  .ponto-btn::after { content: ''; position: absolute; inset: 0; border-radius: inherit; }
+  .ponto-btn:focus-visible { outline: none; box-shadow: none; }
+  .ponto:has(.ponto-btn:focus-visible) { outline: 3px solid var(--preto); outline-offset: 3px; }
+  .ponto-end { margin-top: 6px; font-weight: 400; }
+  .ponto-hora { font-size: 0.92rem; color: rgb(0 0 0 / 0.68); font-weight: 300; }
+  .ponto-eds { margin-top: 10px; }
+  .eds { display: flex; gap: 4px; }
+  .ed {
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.2em 0.42em;
+    border-radius: 5px;
+    border: 1.5px solid rgb(0 0 0 / 0.18);
+    color: rgb(0 0 0 / 0.35);
+  }
+  .ed--on { background: var(--preto); border-color: var(--preto); color: var(--branco); }
+  .ponto-acoes { position: relative; z-index: 1; display: flex; gap: 18px; margin-top: 12px; }
+  .ponto-link {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+    padding-block: 4px;
+  }
+  .ponto-link:hover { color: var(--magenta); }
+</style>

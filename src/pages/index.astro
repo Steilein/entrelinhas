@@ -1,0 +1,466 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import StreetsMap from '../components/StreetsMap.astro';
+import Starburst from '../components/Starburst.astro';
+import Arrow from '../components/Arrow.astro';
+import EditionCover from '../components/EditionCover.astro';
+import Marquee from '../components/Marquee.astro';
+import RevealLines from '../components/RevealLines.astro';
+import Poster from '../components/Poster.astro';
+import PartnerCard from '../components/PartnerCard.astro';
+import { getPontos, getEdicoes, getGaleria } from '../lib/content';
+import { frases, pad, rotuloStatus, site } from '../data/site';
+import { url } from '../lib/url';
+
+const pontos = await getPontos();
+const edicoes = await getEdicoes();
+const galeria = (await getGaleria()).slice(0, 4);
+const parceiros = (await getCollection('parceiros')).sort((a, b) => a.data.ordem - b.data.ordem);
+const atual = edicoes.find((e) => e.status === 'atual') ?? edicoes[0];
+const lancadas = edicoes.filter((e) => e.status !== 'em-breve').length;
+const expositores = pontos.filter((p) => p.data.tipo === 'expositor').length;
+
+const linhas = [
+  { texto: 'Porque nem tudo está dito.', oculto: 'quem decide o que pode ser dito?' },
+  { texto: 'Nem tudo está visível.', oculto: 'o cuidado que ninguém conta como trabalho' },
+  { texto: 'E nem tudo que aprendemos', oculto: '“menina não senta assim”' },
+  { texto: 'precisa permanecer como está.', oculto: 'a quem serve o padrão?' },
+];
+---
+
+<Base>
+  <!-- abertura + atalhos (estrutura do wireframe) -->
+  <section class="hero container">
+    <h1 class="hero-title">
+      Ideias ganham forma. <span class="box box--magenta">Perspectivas ganham mundo.</span>
+    </h1>
+    <div class="hero-side">
+      <p class="hero-lead">
+        O <strong>entrelinhas</strong> espalha livretos <strong>gratuitos</strong> sobre o feminino social por {site.cidade}. Um por mês, durante seis meses.
+        <span class="hero-lead-cta">Encontre o seu.</span>
+      </p>
+      <Starburst class="hero-star" seed={4} points={15} fill="var(--lima)" spin />
+    </div>
+  </section>
+
+  <section class="bento container" aria-label="Comece por aqui">
+    <a class="tile tile--mapa bg-lima" href={url('/mapa')}>
+      <StreetsMap pontos={pontos} />
+      <span class="tile-head">
+        <span class="tile-label">mapa</span>
+        <span class="tile-sub">{expositores} expositores · {pontos.length - expositores} lambe-lambes</span>
+      </span>
+      <span class="btn btn--magenta tile-btn">encontrar minha edição <Arrow /></span>
+    </a>
+
+    <a class="tile tile--sobre bg-lima" href={url('/sobre')}>
+      <Starburst class="tile-star" seed={12} points={16} fill="var(--magenta)" />
+      <span class="tile-label">conheça o entrelinhas</span>
+      <span class="tile-text">Por que, para quem e com quem fazemos.</span>
+      <span class="tile-go" aria-hidden="true"><Arrow /></span>
+    </a>
+
+    <a class="tile tile--edicao bg-lima" href={url(`/edicoes/${atual.id}`)}>
+      <span class="tile-label">edição digital</span>
+      <span class="tile-text">nº {pad(atual.data.numero)}: {atual.data.titulo}. Leia online, página por página.</span>
+      <span class="tile-cover" aria-hidden="true">
+        <EditionCover numero={atual.data.numero} titulo={atual.data.titulo} tema={atual.data.tema} cor={atual.data.cor} />
+      </span>
+      <span class="tile-go" aria-hidden="true"><Arrow /></span>
+    </a>
+  </section>
+
+  <Marquee items={frases} />
+
+  <!-- como funciona -->
+  <section class="section steps">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">simples assim</p>
+        <h2>Como funciona</h2>
+      </div>
+      <ol class="steps-list" role="list">
+        <li class="step reveal">
+          <span class="step-n"><Starburst seed={31} points={14} fill="var(--magenta)" /><span>1</span></span>
+          <h3>Encontre um ponto</h3>
+          <p>Use o <a href={url('/mapa')}>mapa</a> para achar o expositor mais perto: bibliotecas, universidades, teatros e centros culturais.</p>
+        </li>
+        <li class="step reveal">
+          <span class="step-n step-n--dark"><Starburst seed={32} points={14} fill="var(--lima)" /><span>2</span></span>
+          <h3>Pegue o seu. É grátis.</h3>
+          <p>Os livretos ficam nos expositores. Leve um e deixe os outros circularem.</p>
+        </li>
+        <li class="step reveal">
+          <span class="step-n step-n--dark"><Starburst seed={33} points={14} fill="var(--ciano)" /><span>3</span></span>
+          <h3>Leia, questione, compartilhe.</h3>
+          <p>Todo mês tem edição nova. Perdeu alguma? Leia a <a href={url('/edicoes')}>versão digital</a>.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- edição do mês + linha do tempo -->
+  <section class="section destaque bg-magenta grain" aria-labelledby="destaque-titulo">
+    <div class="container destaque-grid">
+      <a class="destaque-cover" href={url(`/edicoes/${atual.id}`)}>
+        <span class="sr-only">Ler a edição {pad(atual.data.numero)} online</span>
+        <span class="destaque-art" aria-hidden="true"><EditionCover numero={atual.data.numero} titulo={atual.data.titulo} tema={atual.data.tema} cor={atual.data.cor} /></span>
+        <span class="destaque-badge" aria-hidden="true">
+          <Starburst seed={50} points={16} fill="var(--lima)" spin />
+          <span>edição<br />do mês</span>
+        </span>
+      </a>
+      <div class="destaque-text">
+        <p class="eyebrow">edição do mês · {atual.data.lancamento}</p>
+        <h2 id="destaque-titulo">{atual.data.titulo}</h2>
+        <p class="destaque-chamada">{atual.data.chamada}</p>
+        <div class="btn-row">
+          <a class="btn btn--lima" href={url(`/edicoes/${atual.id}`)}>ler online <Arrow /></a>
+          <a class="btn btn--branco" href={url(`/mapa?edicao=${atual.data.numero}`)}>onde encontrar</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container timeline">
+      <div class="timeline-head">
+        <h3>Seis meses, seis edições</h3>
+        <p class="timeline-progress">
+          <span class="timeline-bar"><span style={`width:${(lancadas / site.totalEdicoes) * 100}%`}></span></span>
+          {lancadas} de {site.totalEdicoes} lançadas
+        </p>
+      </div>
+      <ol class="tl" role="list">
+        {edicoes.map((e) => (
+          <li class:list={['tl-item', `tl-item--${e.status}`]}>
+            <a href={url(`/edicoes/${e.id}`)}>
+              <span class="tl-mes">{e.data.lancamento}</span>
+              <span class="tl-cover">
+                {e.status === 'em-breve' ? (
+                  <span class="tl-soon" aria-hidden="true"><span>{pad(e.data.numero)}</span></span>
+                ) : (
+                  <EditionCover numero={e.data.numero} titulo={e.data.titulo} tema={e.data.tema} cor={e.data.cor} />
+                )}
+              </span>
+              <span class="tl-title">{e.data.titulo}</span>
+              <span class="tl-status">{rotuloStatus[e.status]}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- por que entrelinhas -->
+  <section class="section porque">
+    <div class="container porque-grid">
+      <div class="porque-side">
+        <p class="eyebrow">por que entrelinhas?</p>
+        <p class="porque-text">
+          O entrelinhas nasce da vontade de investigar, questionar e compartilhar aquilo que merece ser visto por outras perspectivas.
+        </p>
+        <a class="btn btn--ghost" href={url('/sobre')}>conheça o projeto <Arrow /></a>
+      </div>
+      <div class="porque-main">
+        <RevealLines linhas={linhas} />
+      </div>
+    </div>
+  </section>
+
+  <!-- na rua -->
+  <section class="section rua grain" aria-labelledby="rua-titulo">
+    <div class="container rua-head">
+      <div>
+        <p class="eyebrow">a campanha</p>
+        <h2 id="rua-titulo">Na rua</h2>
+      </div>
+      <p class="rua-text">Os lambe-lambes levam as perguntas do entrelinhas para os muros de Curitiba. Viu um por aí? Fotografe e marque {site.instagram.usuario}.</p>
+    </div>
+    <ul class="rua-wall container" role="list">
+      {galeria.map((g, i) => (
+        <li class="rua-item" style={`--tilt:${[-3, 2, -1.5, 3][i % 4]}deg`}>
+          <a href={url(`/galeria#${g.id}`)}>
+            <span class="sr-only">{g.data.titulo}. Lambe-lambe em {g.ponto.data.nome}</span>
+            {g.data.imagem ? (
+              <img src={g.data.imagem} alt="" loading="lazy" />
+            ) : (
+              <Poster variante={g.data.variante} seed={i + 1} />
+            )}
+          </a>
+          <span class="rua-local">{g.ponto.data.nome}</span>
+        </li>
+      ))}
+    </ul>
+    <div class="container btn-row rua-btns">
+      <a class="btn" href={url('/galeria')}>ver a galeria <Arrow /></a>
+      <a class="btn btn--branco" href={url('/mapa?tipo=lambe')}>onde estão os lambe-lambes</a>
+    </div>
+  </section>
+
+  <!-- parceiros -->
+  <section class="section parceiros" aria-labelledby="parceiros-titulo">
+    <div class="container parceiros-grid">
+      <div>
+        <p class="eyebrow">em parceria</p>
+        <h2 id="parceiros-titulo" class="parceiros-title"><span class="box box--lima">Nenhum conhecimento se constrói sozinho.</span></h2>
+        <p class="parceiros-text">O entrelinhas se fortalece no diálogo com coletivos, movimentos e iniciativas que compartilham saberes, experiências e possibilidades de construção.</p>
+      </div>
+      <div class="parceiros-list">
+        {parceiros.map((p) => <PartnerCard parceiro={p} compact />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- redes -->
+  <section class="social bg-ciano grain" aria-labelledby="social-titulo">
+    <div class="container social-inner">
+      <Starburst class="social-star" seed={77} points={20} inner={0.3} jitter={0.4} fill="var(--branco)" spin />
+      <p class="eyebrow">acompanhe</p>
+      <h2 id="social-titulo" class="social-title">
+        <a href={site.instagram.url} target="_blank" rel="noopener">{site.instagram.usuario}</a>
+      </h2>
+      <p class="social-text"><span class="box box--branco">Conheça nossas produções, explore os conteúdos e acompanhe as próximas ideias!</span></p>
+      <div class="btn-row">
+        <a class="btn btn--magenta" href={site.instagram.url} target="_blank" rel="noopener">seguir no Instagram</a>
+        <a class="btn btn--branco" href={`mailto:${site.email}`}>{site.email}</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* ---------- abertura ---------- */
+  .hero {
+    display: grid;
+    grid-template-columns: 1.7fr 1fr;
+    align-items: end;
+    gap: 24px 48px;
+    padding-block: clamp(28px, 5vw, 64px) clamp(24px, 3vw, 36px);
+  }
+  .hero-title { font-size: clamp(2.5rem, 1.5rem + 4.4vw, 5.6rem); line-height: 1; letter-spacing: -0.04em; }
+  .hero-title .box { line-height: 1.12; }
+  .hero-side { position: relative; padding-bottom: 6px; }
+  .hero-lead { position: relative; z-index: 1; font-size: var(--step-1); line-height: 1.35; font-weight: 300; max-width: 30ch; }
+  .hero-lead strong { font-weight: 600; }
+  .hero-lead-cta {
+    display: block;
+    margin-top: 6px;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-style: italic;
+    color: var(--magenta);
+  }
+  .hero-side :global(.hero-star) { position: absolute; width: 120px; right: -16px; top: -150px; z-index: 0; }
+
+  /* ---------- bento (wireframe) ---------- */
+  .bento {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: clamp(14px, 2vw, 24px);
+    height: clamp(520px, 64vh, 680px);
+    padding-bottom: clamp(48px, 7vw, 96px);
+    box-sizing: content-box;
+  }
+  .tile {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(20px, 2.4vw, 32px);
+    border-radius: var(--radius);
+    border: 2px solid var(--preto);
+    text-decoration: none;
+    transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
+  }
+  .tile:hover { transform: translate(-4px, -4px); box-shadow: 8px 8px 0 var(--preto); }
+  .tile-label {
+    position: relative;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: var(--step-3);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    max-width: 12ch;
+  }
+  .tile-text { position: relative; margin-top: 10px; max-width: 26ch; font-weight: 400; line-height: 1.35; }
+  .tile-go {
+    position: absolute;
+    right: clamp(20px, 2.4vw, 32px);
+    bottom: clamp(20px, 2.4vw, 32px);
+    width: 52px;
+    height: 52px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--preto);
+    color: var(--branco);
+    transition: transform 0.3s var(--ease-spring), background 0.2s;
+  }
+  .tile-go :global(.arrow) { width: 24px; }
+  .tile:hover .tile-go { transform: rotate(-45deg) scale(1.08); background: var(--magenta); }
+
+  .tile--mapa { grid-row: 1 / 3; }
+  .tile-head { position: relative; z-index: 1; display: grid; gap: 10px; justify-items: start; }
+  .tile--mapa .tile-label { font-size: var(--step-5); background: var(--lima); padding-right: 0.1em; }
+  .tile-sub { font-family: var(--font-display); font-weight: 700; background: var(--branco); padding: 0.3em 0.6em; border-radius: 6px; border: 2px solid var(--preto); }
+  .tile-btn { position: relative; z-index: 1; margin-top: auto; align-self: flex-start; }
+  .tile--mapa:hover :global(.pin-g) { animation-duration: 1.1s; }
+
+  .tile--sobre :global(.tile-star) {
+    position: absolute;
+    width: 62%;
+    right: -14%;
+    bottom: -30%;
+    transition: transform 0.8s var(--ease-out);
+  }
+  .tile--sobre:hover :global(.tile-star) { transform: rotate(40deg) scale(1.08); }
+  .tile--sobre .tile-go { left: clamp(20px, 2.4vw, 32px); right: auto; }
+
+  .tile-cover {
+    position: absolute;
+    width: 34%;
+    right: 9%;
+    bottom: -18%;
+    rotate: 8deg;
+    box-shadow: -8px 10px 0 rgb(0 0 0 / 0.9);
+    transition: rotate 0.5s var(--ease-spring), translate 0.5s var(--ease-spring);
+  }
+  .tile--edicao:hover .tile-cover { rotate: 2deg; translate: 0 -12%; }
+  .tile--edicao .tile-go { left: clamp(20px, 2.4vw, 32px); right: auto; }
+
+  /* ---------- seções ---------- */
+  .section-head { margin-bottom: clamp(32px, 5vw, 64px); }
+  .section-head .eyebrow, .porque-side .eyebrow, .rua-head .eyebrow, .parceiros .eyebrow, .destaque .eyebrow { margin-bottom: 12px; }
+  .btn-row { display: flex; flex-wrap: wrap; gap: 12px; }
+
+  .steps-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(16px, 3vw, 40px); counter-reset: step; }
+  .step { padding-top: 8px; border-top: 2px solid var(--preto); }
+  .step-n { position: relative; display: grid; place-items: center; width: 96px; height: 96px; margin: 18px 0 14px -8px; }
+  .step-n :global(svg) { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .step-n span { position: relative; font-family: var(--font-display); font-weight: 900; font-size: 2.2rem; color: var(--branco); }
+  .step-n--dark span { color: var(--preto); }
+  .step h3 { margin-bottom: 10px; }
+  .step p { font-weight: 300; max-width: 34ch; }
+  .step a { font-weight: 600; }
+
+  /* edição do mês */
+  .destaque-grid { display: grid; grid-template-columns: minmax(240px, 380px) 1fr; gap: clamp(32px, 6vw, 96px); align-items: center; }
+  .destaque-cover { position: relative; display: block; rotate: -4deg; box-shadow: 14px 16px 0 var(--preto); transition: rotate 0.5s var(--ease-spring); }
+  .destaque-cover:hover { rotate: 0deg; }
+  .destaque-art { display: block; }
+  .destaque-badge {
+    position: absolute;
+    top: -46px;
+    right: -46px;
+    width: 128px;
+    height: 128px;
+    display: grid;
+    place-items: center;
+    color: var(--preto);
+  }
+  .destaque-badge :global(svg) { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .destaque-badge span { position: relative; font-family: var(--font-display); font-weight: 800; font-size: 0.95rem; line-height: 1; text-align: center; rotate: 10deg; }
+  .destaque h2 { font-size: var(--step-5); margin-bottom: 18px; }
+  .destaque-chamada { font-size: var(--step-2); line-height: 1.25; font-weight: 300; max-width: 26ch; margin-bottom: 28px; }
+
+  .timeline { margin-top: clamp(64px, 9vw, 120px); }
+  .timeline-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 22px; }
+  .timeline-progress { display: flex; align-items: center; gap: 12px; font-family: var(--font-display); font-weight: 700; }
+  .timeline-bar { width: 140px; height: 8px; border-radius: 8px; background: rgb(0 0 0 / 0.25); overflow: hidden; }
+  .timeline-bar span { display: block; height: 100%; background: var(--lima); }
+  .tl { display: grid; grid-template-columns: repeat(6, 1fr); gap: clamp(10px, 1.6vw, 20px); }
+  .tl-item a { display: grid; gap: 8px; text-decoration: none; }
+  .tl-mes { font-family: var(--font-display); font-weight: 700; font-size: var(--step--1); text-transform: uppercase; letter-spacing: 0.06em; }
+  .tl-cover { display: block; outline: 2px solid var(--preto); transition: transform 0.35s var(--ease-spring); box-shadow: 6px 6px 0 rgb(0 0 0 / 0.85); }
+  .tl-item--em-breve .tl-cover { outline: 0; }
+  .destaque-art { outline: 2px solid var(--preto); }
+  .tl-item a:hover .tl-cover { transform: translateY(-8px) rotate(-2deg); }
+  .tl-soon {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1 / 1.414;
+    border: 2px dashed rgb(255 255 255 / 0.8);
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(2rem, 4vw, 3.4rem);
+    color: rgb(255 255 255 / 0.85);
+    background: rgb(0 0 0 / 0.08);
+  }
+  .tl-item--em-breve .tl-cover { box-shadow: none; }
+  .tl-title { font-family: var(--font-display); font-weight: 700; line-height: 1.15; font-size: 0.98rem; }
+  .tl-status {
+    justify-self: start;
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.25em 0.6em;
+    border-radius: 999px;
+    background: var(--branco);
+    color: var(--preto);
+  }
+  .tl-item--atual .tl-status { background: var(--lima); }
+  .tl-item--em-breve .tl-status { background: transparent; color: var(--branco); box-shadow: inset 0 0 0 1.5px currentColor; }
+
+  /* por que entrelinhas */
+  .porque { --rule-gap: 3rem; }
+  .porque-grid { display: grid; grid-template-columns: 1fr 2.2fr; gap: clamp(32px, 6vw, 96px); align-items: start; }
+  .porque-side { position: sticky; top: calc(var(--header-h) + 32px); display: grid; gap: 20px; justify-items: start; }
+  .porque-text { font-size: var(--step-1); line-height: 1.4; font-weight: 300; }
+
+  /* na rua */
+  .rua { background: var(--muro); }
+  .rua-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 20px 48px; margin-bottom: clamp(32px, 5vw, 56px); }
+  .rua-text { max-width: 44ch; font-size: var(--step-1); line-height: 1.4; font-weight: 300; }
+  .rua-wall { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(16px, 2.6vw, 36px); }
+  .rua-item { display: grid; gap: 12px; rotate: var(--tilt); transition: rotate 0.4s var(--ease-spring), transform 0.4s var(--ease-spring); }
+  .rua-item:hover { rotate: 0deg; transform: scale(1.03); }
+  .rua-item a { display: block; box-shadow: 0 2px 0 rgb(0 0 0 / 0.1), 0 18px 30px -16px rgb(0 0 0 / 0.55); }
+  .rua-item img { width: 100%; aspect-ratio: 1 / 1.414; object-fit: cover; }
+  .rua-local { font-family: var(--font-display); font-weight: 700; font-size: var(--step--1); }
+  .rua-local::before { content: '✶ '; color: var(--magenta); }
+  .rua-btns { margin-top: clamp(32px, 5vw, 56px); }
+
+  /* parceiros */
+  .parceiros-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 6vw, 96px); align-items: center; }
+  .parceiros-title { font-family: var(--font-text); font-weight: 300; font-size: var(--step-4); line-height: 1.18; letter-spacing: -0.01em; margin-bottom: 24px; }
+  .parceiros-text { font-size: var(--step-1); line-height: 1.4; font-weight: 300; max-width: 40ch; }
+  .parceiros-list { display: grid; gap: 14px; }
+
+  /* redes */
+  .social { overflow: hidden; }
+  .social-inner { position: relative; padding-block: clamp(72px, 11vw, 150px); display: grid; justify-items: start; gap: 22px; }
+  .social-inner :global(.social-star) { position: absolute; width: clamp(280px, 40vw, 560px); right: -8%; top: 50%; translate: 0 -50%; z-index: -1; opacity: 0.9; }
+  .social-title { font-size: clamp(3rem, 1.2rem + 8vw, 9rem); letter-spacing: -0.05em; line-height: 0.9; }
+  .social-title a { text-decoration: none; }
+  .social-title a:hover { text-decoration: underline; text-decoration-thickness: 0.06em; }
+  .social-text { font-size: var(--step-1); line-height: 1.45; max-width: 36ch; }
+
+  /* ---------- responsivo ---------- */
+  @media (max-width: 960px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-side :global(.hero-star) { width: 78px; top: -70px; right: -6px; }
+    .hero-lead { max-width: 34ch; }
+    .bento { grid-template-columns: 1fr 1fr; grid-template-rows: 420px 260px; height: auto; }
+    .tile--mapa { grid-column: 1 / -1; grid-row: auto; }
+    .steps-list { grid-template-columns: 1fr; }
+    .destaque-grid { grid-template-columns: 1fr; justify-items: center; }
+    .destaque-cover { width: min(320px, 78%); }
+    .destaque-text { justify-self: stretch; }
+    .tl { grid-template-columns: repeat(6, minmax(130px, 1fr)); overflow-x: auto; padding: 10px 4px 18px; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); scroll-snap-type: x mandatory; }
+    .tl-item { scroll-snap-align: start; }
+    .porque-grid, .parceiros-grid { grid-template-columns: 1fr; }
+    .porque-side { position: static; }
+    .rua-wall { grid-template-columns: repeat(4, minmax(200px, 1fr)); overflow-x: auto; padding: 12px var(--gutter) 24px; width: 100%; scroll-snap-type: x mandatory; }
+    .rua-item { scroll-snap-align: center; }
+  }
+  @media (max-width: 600px) {
+    .bento { grid-template-columns: 1fr; grid-template-rows: none; }
+    .tile--mapa { min-height: 440px; }
+    .tile--sobre, .tile--edicao { min-height: 230px; }
+    .tile--mapa .tile-label { font-size: 3.6rem; }
+    .tile-cover { width: 38%; right: 6%; }
+    .destaque-badge { width: 100px; height: 100px; top: -34px; right: -30px; }
+  }
+</style>
