@@ -4,7 +4,7 @@ export function initLightbox() {
   const gallery = document.querySelector<HTMLElement>('[data-gallery]');
   if (!dialog || !gallery) return;
 
-  const items = Array.from(gallery.querySelectorAll<HTMLLIElement>(':scope > li'));
+  const items = Array.from(gallery.querySelectorAll<HTMLElement>('[data-item]'));
   const media = dialog.querySelector<HTMLElement>('[data-lb-media]')!;
   const caption = dialog.querySelector<HTMLElement>('[data-lb-caption]')!;
   const count = dialog.querySelector<HTMLElement>('[data-lb-count]')!;
@@ -16,7 +16,17 @@ export function initLightbox() {
     const item = items[index];
     const paper = item.querySelector('.cartaz-paper')!;
     const tpl = item.querySelector<HTMLTemplateElement>('template[data-caption]')!;
-    media.replaceChildren(...Array.from(paper.children).map((c) => c.cloneNode(true)));
+    // no lightbox entra a imagem grande (data-full) no lugar da miniatura
+    media.replaceChildren(
+      ...Array.from(paper.children).map((c) => {
+        const copia = c.cloneNode(true) as HTMLElement;
+        if (copia instanceof HTMLImageElement && copia.dataset.full) {
+          copia.loading = 'eager';
+          copia.src = copia.dataset.full;
+        }
+        return copia;
+      }),
+    );
     caption.replaceChildren(tpl.content.cloneNode(true));
     count.textContent = `${index + 1} / ${items.length}`;
     history.replaceState(null, '', `#${item.id}`);
@@ -45,8 +55,8 @@ export function initLightbox() {
     opener?.focus();
   });
 
-  // abre direto quando vem de um link com #lambe-xx
-  const fromHash = items.findIndex((li) => `#${li.id}` === location.hash);
+  // abre direto quando vem de um link com #obra-... ou #cartaz-...
+  const fromHash = items.findIndex((el) => `#${el.id}` === location.hash);
   if (fromHash >= 0) {
     items[fromHash].scrollIntoView({ block: 'center' });
     show(fromHash);

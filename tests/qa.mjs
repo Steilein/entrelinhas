@@ -66,14 +66,16 @@ for (const [kind] of Object.entries(viewports)) {
 /* ---------- mapa ---------- */
 {
   const { ctx, page } = await newPage('desktop');
-  const esperado3 = pontos.filter((p) => p.edicoes.includes(3)).length;
-  await page.goto(`${BASE}/mapa?edicao=3`, { waitUntil: 'networkidle' });
+  // pontos sem `edicoes` recebem todas as edições já lançadas (a 01, por enquanto)
+  const esperado1 = pontos.filter((p) => !p.edicoes?.length || p.edicoes.includes(1)).length;
+  await page.goto(`${BASE}/mapa?edicao=1`, { waitUntil: 'networkidle' });
   await page.waitForSelector('[data-mapa][data-ready]');
   const count = await page.textContent('[data-count]');
-  ok('mapa ?edicao=3 filtra os pontos', count?.startsWith(String(esperado3)), `${count} (esperado ${esperado3})`);
+  ok('mapa ?edicao=1 filtra os pontos', count?.startsWith(String(esperado1)), `${count} (esperado ${esperado1})`);
   const visiveis = await page.locator('.ponto:not([hidden])').count();
   const markers = await page.locator('.leaflet-marker-icon').count();
-  ok('mapa: lista e marcadores coincidem', visiveis === esperado3 && markers === esperado3, `lista ${visiveis}, marcadores ${markers}`);
+  ok('mapa: lista e marcadores coincidem', visiveis === esperado1 && markers === esperado1, `lista ${visiveis}, marcadores ${markers}`);
+  ok('mapa: sem aviso de protótipo', (await page.locator('.aviso').count()) === 0);
 
   await page.click('[data-edicao="0"]');
   await page.click('[data-tipo="expositor"]');
@@ -161,6 +163,13 @@ for (const kind of ['desktop', 'mobile']) {
   await page.goto(`${BASE}/galeria`, { waitUntil: 'networkidle' });
   await page.locator('[data-open]').first().click();
   ok('galeria: lightbox abre', await page.locator('dialog[open]').isVisible());
+  const grande = await page
+    .waitForFunction(() => {
+      const img = document.querySelector('[data-lb-media] img');
+      return img && img.complete && img.naturalWidth > 1000 && !img.src.includes('-p.webp');
+    }, null, { timeout: 8000 })
+    .then(() => true, () => false);
+  ok('galeria: lightbox mostra a imagem grande', grande);
   await page.keyboard.press('ArrowRight');
   ok('galeria: seta passa para o próximo', (await page.textContent('[data-lb-count]'))?.startsWith('2 /'));
   if (SHOTS) await page.screenshot({ path: join(OUT, 'desktop-galeria-lightbox.png') });
@@ -168,6 +177,7 @@ for (const kind of ['desktop', 'mobile']) {
   ok('galeria: ESC fecha', (await page.locator('dialog[open]').count()) === 0);
 
   await page.goto(`${BASE}/`, { waitUntil: 'networkidle' });
+  ok('home: Instagram @ellielikesdsgn', (await page.locator('a[href="https://www.instagram.com/ellielikesdsgn/"]').count()) > 0);
   await page.click('[data-marquee-toggle]');
   ok('home: letreiro pausa', await page.locator('[data-marquee].is-paused').count() === 1);
   await ctx.close();

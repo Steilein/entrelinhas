@@ -1,4 +1,4 @@
-import { defineCollection, reference } from 'astro:content';
+import { defineCollection } from 'astro:content';
 import { glob, file } from 'astro/loaders';
 import { z } from 'astro/zod';
 
@@ -16,6 +16,7 @@ const pontos = defineCollection({
     lat: z.number().min(-25.65).max(-25.33),
     lng: z.number().min(-49.4).max(-49.18),
     horario: z.string(),
+    /** Sem `edicoes`, o ponto recebe todas as edições já lançadas (ver getPontos). */
     edicoes: z.array(z.number().int().min(1).max(6)).default([]),
     descricao: z.string().optional(),
   }),
@@ -49,16 +50,19 @@ const edicoes = defineCollection({
   }),
 });
 
-/** Galeria de lambe-lambes. Sem `imagem`, o site desenha o cartaz pela variante. */
+/** Peças da campanha de lambe-lambes: cada obra é colada ao lado do cartaz da mesma série. */
 const galeria = defineCollection({
   loader: file('src/data/galeria.json'),
   schema: z.object({
     titulo: z.string(),
-    variante: z.enum(['ideias', 'forma', 'questionar', 'porque', 'nenhum', 'olhar', 'explosao', 'nada']),
-    ponto: reference('pontos'),
-    edicao: z.number().int().min(1).max(6).optional(),
-    imagem: z.string().optional(),
-    alt: z.string().optional(),
+    tipo: z.enum(['obra', 'cartaz']),
+    /** Série que une a obra ao cartaz (ex.: "o corpo."). */
+    serie: z.string(),
+    /** Caminho sem extensão: o site usa <imagem>-p.webp (miniatura) e <imagem>.webp (ampliada). */
+    imagem: z.string(),
+    alt: z.string(),
+    /** Texto de apoio do cartaz, repetido como texto na página. */
+    texto: z.string().optional(),
   }),
 });
 

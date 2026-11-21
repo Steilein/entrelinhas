@@ -1,60 +1,109 @@
 ---
 import Base from '../layouts/Base.astro';
-import Poster from '../components/Poster.astro';
 import Starburst from '../components/Starburst.astro';
-import { getGaleria } from '../lib/content';
-import { pad, site } from '../data/site';
+import Arrow from '../components/Arrow.astro';
+import { getGaleria, getPontos } from '../lib/content';
+import { site } from '../data/site';
 import { url } from '../lib/url';
 import fotos from '../data/fotos.json';
+import rua from '../data/rua.json';
 
-const galeria = await getGaleria();
-const tilts = [-2.5, 1.8, -1.2, 2.6, -3, 1.2, 2.2, -1.8];
+const series = await getGaleria();
+// ordem da navegação no lightbox: obra e cartaz de cada série, em sequência
+const pecas = series.flatMap((s) => [s.obra, s.cartaz]).filter((p) => p !== undefined);
+const lambes = (await getPontos()).filter((p) => p.data.tipo === 'lambe').length;
+const tilts = [-2.2, 1.6, 1.4, -1.8, -1.2, 2];
 ---
 
 <Base
   title="Galeria"
-  description="Os lambe-lambes da campanha do entrelinhas nos muros de Curitiba. Veja cada cartaz e onde ele está no mapa."
+  description="As obras e os cartazes da campanha de lambe-lambes do entrelinhas nos muros de Curitiba, e o ensaio fotográfico do kit da edição 01."
 >
   <section class="gal-hero bg-preto">
     <div class="container gal-hero-inner">
       <p class="eyebrow">galeria · a campanha</p>
       <h1>Perguntas <span class="box box--magenta">coladas</span> na cidade.</h1>
       <p class="gal-lead">
-        A campanha de lambe-lambes ocupa muros e painéis de {site.cidade} com as provocações de cada edição. Clique num cartaz para ampliar e ver onde ele está.
+        A campanha de lambe-lambes ocupa muros, pilares e pontos de ônibus de {site.cidade}. Cada obra vai para a rua ao lado de um cartaz com uma pergunta e um QR-Code que leva até aqui.
       </p>
       <a class="btn btn--lima" href={url('/mapa?tipo=lambe')}>ver os lambe-lambes no mapa</a>
     </div>
     <Starburst class="gal-star" seed={66} points={22} inner={0.3} jitter={0.45} fill="var(--magenta)" spin />
   </section>
 
-  <section class="muro grain">
-    <ul class="muro-grid container" role="list" data-gallery>
-      {galeria.map((g, i) => (
-        <li class="cartaz" id={g.id} style={`--tilt:${tilts[i % tilts.length]}deg`}>
-          <button type="button" class="cartaz-btn" data-open={i}>
-            <span class="sr-only">Ampliar: {g.data.titulo}</span>
-            <span class="cartaz-paper" aria-hidden="true">
-              {g.data.imagem ? (
-                <img src={url(g.data.imagem)} alt={g.data.alt ?? ''} loading="lazy" />
-              ) : (
-                <Poster variante={g.data.variante} seed={i + 1} />
-              )}
-            </span>
-          </button>
-          <div class="cartaz-info">
-            <p class="cartaz-local">{g.ponto.data.nome}</p>
-            {g.data.edicao && <p class="cartaz-ed">edição {pad(g.data.edicao)}</p>}
+  <section class="muro grain" aria-labelledby="cartazes-titulo">
+    <div class="container muro-head">
+      <p class="eyebrow">os lambe-lambes</p>
+      <h2 id="cartazes-titulo">Três obras, <span class="box box--lima">três perguntas.</span></h2>
+      <p>Obra e cartaz da mesma série são colados lado a lado em {lambes} pontos da cidade. Clique numa peça para ampliar.</p>
+    </div>
+
+    <ol class="container series" role="list" data-gallery>
+      {series.map((s, i) => (
+        <li class:list={['serie', { 'serie--inversa': i % 2 === 1 }]}>
+          <div class="serie-pecas">
+            {[s.obra, s.cartaz].map((p, j) => p && (
+              <div class="cartaz" id={p.id} data-item style={`--tilt:${tilts[(i * 2 + j) % tilts.length]}deg`}>
+                <button type="button" class="cartaz-btn" data-open={pecas.indexOf(p)}>
+                  <span class="sr-only">Ampliar {p.data.tipo === 'obra' ? 'a obra' : 'o cartaz'}: {p.data.titulo}</span>
+                  <span class="cartaz-paper" aria-hidden="true">
+                    <img src={url(`${p.data.imagem}-p.webp`)} data-full={url(`${p.data.imagem}.webp`)} alt={p.data.alt} loading="lazy" decoding="async" />
+                  </span>
+                </button>
+                <template data-caption>
+                  <p class="lb-kicker">{p.data.tipo} · série {p.data.serie}</p>
+                  <p class="lb-title">{p.data.titulo}</p>
+                  <p class="lb-local">
+                    {p.data.tipo === 'obra'
+                      ? 'Na rua, ela é colada ao lado do cartaz da mesma série. A obra também está no verso do fanzine.'
+                      : 'Na rua, ele é colado ao lado da obra da mesma série. O QR-Code leva para este site.'}
+                  </p>
+                  <a class="btn btn--sm btn--lima" href={url('/mapa?tipo=lambe')}>onde estão os lambe-lambes</a>
+                </template>
+              </div>
+            ))}
           </div>
-          <template data-caption>
-            <p class="lb-title">{g.data.titulo}</p>
-            <p class="lb-local">{g.ponto.data.nome} · {g.ponto.data.bairro}{g.data.edicao ? ` · edição ${pad(g.data.edicao)}` : ''}</p>
-            <a class="btn btn--sm btn--lima" href={url(`/mapa?ponto=${g.ponto.id}`)}>ver no mapa</a>
-          </template>
+          {s.cartaz && (
+            <div class="serie-texto">
+              <p class="serie-nome"><span class="box box--preto">{s.serie}</span></p>
+              <h3>{s.cartaz.data.titulo}</h3>
+              {s.cartaz.data.texto && <p class="serie-desc">{s.cartaz.data.texto}</p>}
+            </div>
+          )}
+        </li>
+      ))}
+    </ol>
+
+    <div class="container">
+      <aside class="leve bg-magenta" aria-labelledby="leve-titulo">
+        <img class="leve-foto" src={url('/fotos/9443-p.webp')} alt="Verso do fanzine aberto como pôster, com a obra do rosto vermelho e ciano, erguido diante de tijolos vazados." loading="lazy" decoding="async" />
+        <div class="leve-texto">
+          <p class="eyebrow">leve para casa</p>
+          <h2 id="leve-titulo">A arte da rua também é sua.</h2>
+          <p>O fanzine que acompanha o livreto traz, num dos versos, uma das obras dos lambe-lambes. Aberto, ele vira um pôster para você guardar.</p>
+          <a class="btn btn--branco" href={url('/sobre#pecas-titulo')}>conheça o kit <Arrow /></a>
+        </div>
+        <Starburst class="leve-star" seed={41} points={16} fill="var(--lima)" spin />
+      </aside>
+    </div>
+  </section>
+
+  <section class="section container na-rua" id="na-rua" aria-labelledby="rua-titulo">
+    <div class="ensaio-head">
+      <p class="eyebrow">na rua</p>
+      <h2 id="rua-titulo">A campanha <span class="box box--magenta">pelos muros.</span></h2>
+      <p>Os pares de lambe-lambes em pilares, muros e pontos de ônibus de {site.cidade}. Clique numa imagem para vê-la em tamanho grande.</p>
+    </div>
+    <ul class="ensaio-grid" role="list">
+      {rua.map((f) => (
+        <li class:list={['ensaio-item', { 'ensaio-item--alto': f.formato === 'retrato' }]} id={f.arquivo}>
+          <a href={url(`/rua/${f.arquivo}.webp`)} target="_blank" rel="noopener">
+            <img src={url(`/rua/${f.arquivo}-p.webp`)} alt={f.alt} loading="lazy" decoding="async" />
+          </a>
         </li>
       ))}
     </ul>
-    <p class="container muro-note">
-      {site.conteudoIlustrativo ? 'Os cartazes acima são reproduções digitais; as fotos da campanha na rua entram aqui assim que os lambe-lambes forem colados.' : ''}
+    <p class="muro-note">
       Viu um lambe-lambe do entrelinhas? Fotografe e marque <a href={site.instagram.url} target="_blank" rel="noopener">{site.instagram.usuario}</a>.
     </p>
   </section>
@@ -67,7 +116,7 @@ const tilts = [-2.5, 1.8, -1.2, 2.6, -3, 1.2, 2.2, -1.8];
     </div>
     <ul class="ensaio-grid" role="list">
       {fotos.map((f) => (
-        <li class:list={['ensaio-item', { 'ensaio-item--alto': f.formato === 'retrato' }]}>
+        <li class:list={['ensaio-item', { 'ensaio-item--alto': f.formato === 'retrato', 'ensaio-item--destaque': f.formato === 'destaque' }]}>
           <a href={url(`/fotos/${f.arquivo}.webp`)} target="_blank" rel="noopener">
             <img src={url(`/fotos/${f.arquivo}-p.webp`)} alt={f.alt} loading="lazy" decoding="async" />
           </a>
@@ -76,15 +125,15 @@ const tilts = [-2.5, 1.8, -1.2, 2.6, -3, 1.2, 2.2, -1.8];
     </ul>
   </section>
 
-  <dialog class="lightbox" data-lightbox aria-label="Cartaz ampliado">
+  <dialog class="lightbox" data-lightbox aria-label="Peça ampliada">
     <div class="lb-inner">
       <div class="lb-media" data-lb-media></div>
       <div class="lb-side">
         <div class="lb-caption" data-lb-caption></div>
         <div class="lb-nav">
-          <button type="button" class="lb-btn" data-lb-prev aria-label="Cartaz anterior">←</button>
+          <button type="button" class="lb-btn" data-lb-prev aria-label="Peça anterior">←</button>
           <span class="lb-count" data-lb-count></span>
-          <button type="button" class="lb-btn" data-lb-next aria-label="Próximo cartaz">→</button>
+          <button type="button" class="lb-btn" data-lb-next aria-label="Próxima peça">→</button>
         </div>
       </div>
       <button type="button" class="lb-close" data-lb-close aria-label="Fechar">
@@ -115,8 +164,22 @@ const tilts = [-2.5, 1.8, -1.2, 2.6, -3, 1.2, 2.2, -1.8];
     background-size: 120px 60px;
     padding-block: clamp(56px, 8vw, 110px);
   }
-  .muro-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: clamp(32px, 5vw, 64px) clamp(24px, 4vw, 48px); }
-  .cartaz { display: grid; gap: 14px; rotate: var(--tilt); transition: rotate 0.4s var(--ease-spring); }
+  .muro-head { display: grid; gap: 14px; justify-items: start; margin-bottom: clamp(36px, 5vw, 64px); }
+  .muro-head h2 { font-size: var(--step-4); line-height: 1.05; }
+  .muro-head h2 .box { line-height: 1.2; }
+  .muro-head p:last-child { max-width: 52ch; font-size: var(--step-1); line-height: 1.4; font-weight: 300; }
+
+  /* cada série: obra + cartaz lado a lado, com o texto do cartaz ao lado */
+  .series { display: grid; gap: clamp(56px, 8vw, 104px); }
+  .serie { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 72px); align-items: center; }
+  .serie--inversa .serie-pecas { order: 2; }
+  .serie-pecas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(14px, 2.4vw, 32px); align-items: end; }
+  .serie-texto { display: grid; gap: 16px; justify-items: start; }
+  .serie-nome { --box-topo: 0em; --box-base: 0em; font-family: var(--font-text); font-size: var(--step-1); }
+  .serie-texto h3 { font-size: var(--step-3); line-height: 1.02; letter-spacing: -0.03em; }
+  .serie-desc { font-size: var(--step-1); line-height: 1.4; max-width: 34ch; }
+
+  .cartaz { rotate: var(--tilt); transition: rotate 0.4s var(--ease-spring); }
   .cartaz:hover { rotate: 0deg; }
   .cartaz-btn { display: block; width: 100%; border-radius: 2px; }
   .cartaz-paper {
@@ -137,7 +200,28 @@ const tilts = [-2.5, 1.8, -1.2, 2.6, -3, 1.2, 2.2, -1.8];
     mix-blend-mode: screen;
   }
   .cartaz-btn:hover .cartaz-paper { transform: scale(1.03); }
-  .cartaz-paper img { width: 100%; aspect-ratio: 1 / 1.414; object-fit: cover; }
+  .cartaz-paper img { width: 100%; }
+
+  /* leve para casa */
+  .leve {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    align-items: center;
+    gap: clamp(24px, 4vw, 56px);
+    margin-top: clamp(64px, 9vw, 120px);
+    padding: clamp(20px, 3vw, 36px);
+    border: 2px solid var(--preto);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-hard);
+  }
+  .leve-foto { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--radius-sm); border: 2px solid var(--preto); }
+  .leve-texto { position: relative; z-index: 1; display: grid; gap: 16px; justify-items: start; padding-block: 8px; }
+  .leve-texto h2 { font-size: var(--step-4); line-height: 1; max-width: 12ch; }
+  .leve-texto p:not(.eyebrow) { font-size: var(--step-1); line-height: 1.4; max-width: 36ch; }
+  .leve :global(.leve-star) { position: absolute; z-index: -1; width: clamp(160px, 22vw, 300px); right: -60px; bottom: -80px; }
 
   .ensaio-head { display: grid; gap: 14px; max-width: 760px; margin-bottom: clamp(28px, 4vw, 48px); }
   .ensaio-head h2 { font-size: var(--step-4); line-height: 1.05; }
@@ -146,14 +230,14 @@ const tilts = [-2.5, 1.8, -1.2, 2.6, -3, 1.2, 2.2, -1.8];
   .ensaio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); grid-auto-rows: 220px; grid-auto-flow: dense; gap: 12px; }
   .ensaio-item--alto { grid-row: span 2; }
   .ensaio-item--alto img { object-position: center 70%; }
+  @media (min-width: 640px) {
+    .ensaio-item--destaque { grid-column: span 2; grid-row: span 2; }
+  }
   .ensaio-item a { display: block; height: 100%; overflow: hidden; border-radius: 4px; outline-offset: 3px; }
   .ensaio-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s var(--ease-out); }
   .ensaio-item a:hover img { transform: scale(1.04); }
-  .cartaz-info { display: flex; justify-content: space-between; gap: 10px; font-family: var(--font-display); font-size: var(--step--1); }
-  .cartaz-local { font-weight: 700; }
-  .cartaz-local::before { content: '✶ '; color: var(--magenta); }
-  .cartaz-ed { font-weight: 500; }
-  .muro-note { margin-top: clamp(40px, 6vw, 72px); font-weight: 300; max-width: 70ch; }
+  .na-rua { padding-bottom: 0; }
+  .muro-note { margin-top: clamp(28px, 4vw, 44px); font-weight: 300; max-width: 70ch; }
   .muro-note a { font-weight: 600; }
 
   .lightbox {
@@ -171,10 +255,10 @@ const tilts = [-2.5, 1.8, -1.2, 2.6, -3, 1.2, 2.2, -1.8];
   @keyframes lb-in { from { transform: scale(0.94); opacity: 0; } }
   .lb-inner { position: relative; display: grid; grid-template-columns: minmax(0, 1.2fr) 1fr; }
   .lb-media { padding: clamp(16px, 3vw, 32px); background: var(--muro); display: grid; place-items: center; }
-  .lb-media > :global(*) { width: min(100%, calc((100dvh - 120px) / 1.414)); box-shadow: 0 18px 40px -20px rgb(0 0 0 / 0.6); }
-  .lb-media :global(img) { aspect-ratio: 1 / 1.414; object-fit: cover; }
+  .lb-media :global(img) { width: auto; max-width: 100%; max-height: calc(100dvh - 120px); box-shadow: 0 18px 40px -20px rgb(0 0 0 / 0.6); }
   .lb-side { display: flex; flex-direction: column; justify-content: space-between; gap: 24px; padding: clamp(24px, 3vw, 40px); }
   .lb-caption { display: grid; gap: 14px; justify-items: start; padding-right: 40px; }
+  .lb-caption :global(.lb-kicker) { font-family: var(--font-display); font-weight: 700; font-size: var(--step--1); letter-spacing: 0.06em; text-transform: uppercase; }
   .lb-caption :global(.lb-title) { font-family: var(--font-display); font-weight: 800; font-size: var(--step-3); line-height: 1.02; letter-spacing: -0.03em; }
   .lb-caption :global(.lb-local) { font-weight: 300; }
   .lb-nav { display: flex; align-items: center; gap: 14px; }
@@ -183,8 +267,15 @@ const tilts = [-2.5, 1.8, -1.2, 2.6, -3, 1.2, 2.2, -1.8];
   .lb-count { font-family: var(--font-display); font-weight: 700; font-variant-numeric: tabular-nums; }
   .lb-close { position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; background: var(--branco); border: 2px solid var(--preto); }
   .lb-close svg { width: 18px; }
+
+  @media (max-width: 900px) {
+    .serie { grid-template-columns: 1fr; }
+    .serie--inversa .serie-pecas { order: 0; }
+    .serie-texto { order: -1; }
+    .leve { grid-template-columns: 1fr; }
+  }
   @media (max-width: 760px) {
     .lb-inner { grid-template-columns: 1fr; }
-    .lb-media > :global(*) { width: min(100%, 300px); }
+    .lb-media :global(img) { max-height: 62dvh; }
   }
 </style>

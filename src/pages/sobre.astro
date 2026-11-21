@@ -24,7 +24,7 @@ const numeros = [
 const pecas = [
   {
     nome: 'Livreto',
-    img: '/fotos/9440-p.webp',
+    img: '/fotos/9439-p.webp',
     alt: 'Livreto da edição 01 com a cinta “O feminino não vem de fábrica”, segurado com as duas mãos.',
     texto: '36 páginas em formato de bolso (10,5 × 14 cm): cinco capítulos, obras de arte, um glossário e um espaço para você responder.',
   },
@@ -44,7 +44,9 @@ const pecas = [
     nome: 'Fanzine',
     img: '/pecas/fanzine.webp',
     alt: 'Os oito painéis do fanzine, em lima, ciano e magenta, com as frases do projeto.',
-    texto: 'Uma folha dobrada em oito painéis que apresenta o projeto. Aberta, vira pôster.',
+    verso: '/pecas/fanzine-poster.webp',
+    versoAlt: 'O verso do fanzine: a obra do rosto vermelho e ciano, a mesma de um dos lambe-lambes.',
+    texto: 'Uma folha dobrada em oito painéis que apresenta o projeto. No verso, uma das obras dos lambe-lambes: aberta, vira um pôster para você levar a arte da rua para casa.',
   },
 ];
 
@@ -70,8 +72,12 @@ const faq = [
     a: `Pode e deve! Escreva para <a href="mailto:${site.email}">${site.email}</a> e a gente conversa.`,
   },
   {
+    q: 'Posso ficar com a arte dos lambe-lambes?',
+    a: `Pode! O fanzine que acompanha o livreto traz, num dos versos, uma das obras da campanha. Aberto, ele vira um pôster. Veja todas as obras na <a href="${url('/galeria')}">galeria</a>.`,
+  },
+  {
     q: 'Quem faz o entrelinhas?',
-    a: `É o projeto de conclusão de curso em ${site.credito.curso} (${site.credito.instituicao}) de ${site.credito.autora}, desenvolvido em parceria com coletivos e movimentos de mulheres.`,
+    a: 'O entrelinhas é um projeto editorial independente que articula comunicação, arte e mobilização social para provocar reflexões sobre o feminino. Sua construção acontece em parceria com coletivos e movimentos de mulheres, fortalecendo espaços de diálogo e transformação.',
   },
 ];
 ---
@@ -141,7 +147,7 @@ const faq = [
       </div>
       <div>
         <h3>Campanha nas ruas</h3>
-        <p>Lambe-lambes e mídia exterior levam as perguntas do entrelinhas para os muros, com composições que dialogam com obras de arte sobre o feminino. <a href={url('/galeria')}>Veja a galeria.</a></p>
+        <p>Lambe-lambes e mídia exterior levam as perguntas do entrelinhas para os muros, com obras que dialogam com o feminino. As mesmas obras estampam o verso do fanzine. <a href={url('/galeria')}>Veja a galeria.</a></p>
       </div>
       <div>
         <h3>Edição digital</h3>
@@ -167,7 +173,10 @@ const faq = [
     <ul class="pecas-grid" role="list">
       {pecas.map((p) => (
         <li class="peca">
-          <div class="peca-img"><img src={url(p.img)} alt={p.alt} loading="lazy" decoding="async" /></div>
+          <div class:list={['peca-img', { 'peca-img--verso': p.verso }]}>
+            <img src={url(p.img)} alt={p.alt} loading="lazy" decoding="async" />
+            {p.verso && <img class="peca-verso" src={url(p.verso)} alt={p.versoAlt} loading="lazy" decoding="async" />}
+          </div>
           <h3>{p.nome}</h3>
           <p>{p.texto}</p>
         </li>
@@ -225,8 +234,11 @@ const faq = [
   .peca-img img { max-width: 100%; max-height: 100%; object-fit: contain; }
   .peca:first-child .peca-img { padding: 0; }
   .peca:first-child .peca-img img { width: 100%; height: 100%; max-height: none; object-fit: cover; }
+  /* fanzine: frente e, por cima, o verso que vira pôster */
+  .peca-img--verso { position: relative; place-items: center start; padding-right: 30%; }
+  .peca-img .peca-verso { position: absolute; right: 7%; bottom: 9%; width: 30%; max-height: none; rotate: 6deg; box-shadow: -5px 6px 0 rgb(0 0 0 / 0.85); }
   .peca h3 { font-size: var(--step-2); }
-  .peca p { font-weight: 300; line-height: 1.45; }
+  .peca p { font-family: var(--font-editorial); line-height: 1.45; }
   .pecas-mais { margin-top: clamp(24px, 3vw, 36px); }
   .sobre-hero { position: relative; overflow: hidden; border-bottom: 2px solid var(--preto); }
   .sobre-hero-inner { position: relative; z-index: 1; padding-block: clamp(64px, 11vw, 160px); }
@@ -238,12 +250,13 @@ const faq = [
 
   .intro { display: grid; gap: clamp(28px, 4vw, 48px); }
   .intro-big { font-family: var(--font-text); font-weight: 300; font-size: var(--step-4); line-height: 1.2; max-width: 20ch; }
-  .intro-cols { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(20px, 4vw, 64px); font-size: var(--step-1); line-height: 1.45; font-weight: 300; }
+  .intro-cols { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(20px, 4vw, 64px); font-family: var(--font-editorial); font-size: var(--step-1); line-height: 1.45; }
 
   .nome-inner { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 6vw, 96px); align-items: center; padding-block: clamp(64px, 10vw, 140px); }
   .nome-mark { color: var(--branco); }
   .nome-text { display: grid; gap: 16px; font-size: var(--step-1); line-height: 1.45; font-weight: 300; }
   .nome-text h2 { font-size: var(--step-4); color: var(--lima); }
+  .nome-text p:not(.eyebrow) { font-family: var(--font-editorial); }
   .nome-text .eyebrow { color: var(--lima); }
 
   .como-head { margin-bottom: clamp(32px, 5vw, 56px); }
@@ -254,7 +267,7 @@ const faq = [
   .numero-l { font-family: var(--font-display); font-weight: 600; line-height: 1.15; }
   .como-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(20px, 3vw, 48px); margin-top: clamp(40px, 6vw, 72px); }
   .como-cols h3 { margin-bottom: 10px; padding-top: 14px; border-top: 2px solid var(--preto); }
-  .como-cols p { font-weight: 300; }
+  .como-cols p { font-family: var(--font-editorial); }
   .como-cols a { font-weight: 600; }
 
   .para-quem .eyebrow { margin-bottom: 16px; }
@@ -262,8 +275,9 @@ const faq = [
 
   .bg-cinza { background: var(--cinza); }
   .parc-head { display: grid; gap: 18px; max-width: 60ch; margin-bottom: clamp(32px, 5vw, 56px); }
+  .intro-big, .parc-head h2 { --box-topo: 0em; --box-base: 0em; }
   .parc-head h2 { font-family: var(--font-text); font-weight: 300; font-size: var(--step-4); line-height: 1.18; letter-spacing: -0.01em; }
-  .parc-head p { font-size: var(--step-1); line-height: 1.45; font-weight: 300; }
+  .parc-head p:not(.eyebrow) { font-family: var(--font-editorial); font-size: var(--step-1); line-height: 1.45; }
   .parc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
   .parc-grid :global(.partner) { grid-template-columns: 1fr; align-items: start; }
 
@@ -290,7 +304,7 @@ const faq = [
   .faq-icon::before, .faq-icon::after { content: ''; position: absolute; left: 50%; top: 50%; width: 12px; height: 2.5px; background: var(--branco); translate: -50% -50%; transition: rotate 0.3s var(--ease-out); }
   .faq-icon::after { rotate: 90deg; }
   details[open] .faq-icon::after { rotate: 0deg; }
-  details p { padding: 0 22px 20px; font-weight: 400; max-width: 62ch; }
+  details p { padding: 0 22px 20px; font-family: var(--font-editorial); font-size: var(--step-1); line-height: 1.45; max-width: 58ch; }
   details :global(a) { font-weight: 600; }
 
   .cta-final { border-top: 2px solid var(--preto); }

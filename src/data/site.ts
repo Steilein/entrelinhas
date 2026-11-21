@@ -11,8 +11,8 @@ export const site = {
   totalEdicoes: 6,
   cidade: 'Curitiba',
   instagram: {
-    usuario: '@entre.linhas',
-    url: 'https://www.instagram.com/entre.linhas/',
+    usuario: '@ellielikesdsgn',
+    url: 'https://www.instagram.com/ellielikesdsgn/',
   },
   email: 'entre.linhas@gmail.com',
   credito: {
@@ -21,8 +21,14 @@ export const site = {
     instituicao: 'PUCPR',
     ano: 2026,
   },
-  /** Enquanto pontos, edições e fotos forem provisórios, mantenha `true` para exibir o aviso no rodapé. */
-  conteudoIlustrativo: true,
+  /** `true` exibe o aviso de protótipo (mapa e rodapé). Desligado a pedido da Helena em nov/2026. */
+  conteudoIlustrativo: false,
+  /**
+   * Alfabet (títulos) e Jubilat (texto) vêm da Adobe Fonts. Cole aqui o ID do projeto web,
+   * o trecho "abc1234" de https://use.typekit.net/abc1234.css.
+   * Vazio: o site usa as substitutas gratuitas, Archivo e Zilla Slab.
+   */
+  adobeFonts: 'wsn2hin',
 };
 
 /** Frases do folder, usadas no letreiro corrido e nos cartazes. */

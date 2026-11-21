@@ -7,15 +7,15 @@ import Arrow from '../components/Arrow.astro';
 import EditionCover from '../components/EditionCover.astro';
 import Marquee from '../components/Marquee.astro';
 import RevealLines from '../components/RevealLines.astro';
-import Poster from '../components/Poster.astro';
 import PartnerCard from '../components/PartnerCard.astro';
-import { getPontos, getEdicoes, getGaleria } from '../lib/content';
+import { getPontos, getEdicoes } from '../lib/content';
 import { frases, pad, rotuloStatus, site } from '../data/site';
 import { url } from '../lib/url';
+import rua from '../data/rua.json';
 
 const pontos = await getPontos();
 const edicoes = await getEdicoes();
-const galeria = (await getGaleria()).slice(0, 4);
+const naRua = rua.filter((f) => f.home);
 const parceiros = (await getCollection('parceiros')).sort((a, b) => a.data.ordem - b.data.ordem);
 const atual = edicoes.find((e) => e.status === 'atual') ?? edicoes[0];
 const lancadas = edicoes.filter((e) => e.status !== 'em-breve').length;
@@ -63,7 +63,7 @@ const linhas = [
 
     <a class="tile tile--edicao bg-lima" href={url(`/edicoes/${atual.id}`)}>
       <span class="tile-label">edição digital</span>
-      <span class="tile-text">nº {pad(atual.data.numero)}: {atual.data.titulo}. Leia online, página por página.</span>
+      <span class="tile-text">nº {pad(atual.data.numero)}: {atual.data.titulo}. Leia online.</span>
       <span class="tile-cover" aria-hidden="true">
         <EditionCover numero={atual.data.numero} titulo={atual.data.titulo} tema={atual.data.tema} cor={atual.data.cor} capa={atual.data.capa} />
       </span>
@@ -174,20 +174,15 @@ const linhas = [
         <p class="eyebrow">a campanha</p>
         <h2 id="rua-titulo">Na rua</h2>
       </div>
-      <p class="rua-text">Os lambe-lambes levam as perguntas do entrelinhas para os muros de Curitiba. Viu um por aí? Fotografe e marque {site.instagram.usuario}.</p>
+      <p class="rua-text">Os lambe-lambes levam as perguntas do entrelinhas para os muros de Curitiba. E as obras também vêm no verso do fanzine, para você levar para casa. Viu um por aí? Fotografe e marque {site.instagram.usuario}.</p>
     </div>
     <ul class="rua-wall container" role="list">
-      {galeria.map((g, i) => (
+      {naRua.map((f, i) => (
         <li class="rua-item" style={`--tilt:${[-3, 2, -1.5, 3][i % 4]}deg`}>
-          <a href={url(`/galeria#${g.id}`)}>
-            <span class="sr-only">{g.data.titulo}. Lambe-lambe em {g.ponto.data.nome}</span>
-            {g.data.imagem ? (
-              <img src={url(g.data.imagem)} alt="" loading="lazy" />
-            ) : (
-              <Poster variante={g.data.variante} seed={i + 1} />
-            )}
+          <a href={url(`/galeria#${f.arquivo}`)}>
+            <img src={url(`/rua/${f.arquivo}-p.webp`)} alt={f.alt} loading="lazy" decoding="async" />
           </a>
-          <span class="rua-local">{g.ponto.data.nome}</span>
+          <span class="rua-local">{f.serie}</span>
         </li>
       ))}
     </ul>
@@ -237,7 +232,7 @@ const linhas = [
     gap: 24px 48px;
     padding-block: clamp(28px, 5vw, 64px) clamp(24px, 3vw, 36px);
   }
-  .hero-title { font-size: clamp(2.5rem, 1.5rem + 4.4vw, 5.6rem); line-height: 1; letter-spacing: -0.04em; }
+  .hero-title { position: relative; z-index: 1; font-size: clamp(2.5rem, 1.5rem + 4.4vw, 5.6rem); line-height: 1; letter-spacing: -0.04em; }
   .hero-title .box { line-height: 1.12; }
   .hero-side { position: relative; padding-bottom: 6px; }
   .hero-lead { position: relative; z-index: 1; font-size: var(--step-1); line-height: 1.35; font-weight: 300; max-width: 30ch; }
@@ -329,6 +324,7 @@ const linhas = [
   }
   .tile--edicao:hover .tile-cover { rotate: 2deg; translate: 0 -12%; }
   .tile--edicao .tile-go { left: clamp(20px, 2.4vw, 32px); right: auto; }
+  .tile--edicao :is(.tile-label, .tile-text) { max-width: 52%; }
 
   /* ---------- seções ---------- */
   .section-head { margin-bottom: clamp(32px, 5vw, 64px); }
@@ -342,7 +338,7 @@ const linhas = [
   .step-n span { position: relative; font-family: var(--font-display); font-weight: 900; font-size: 2.2rem; color: var(--branco); }
   .step-n--dark span { color: var(--preto); }
   .step h3 { margin-bottom: 10px; }
-  .step p { font-weight: 300; max-width: 34ch; }
+  .step p { font-family: var(--font-editorial); font-size: var(--step-1); line-height: 1.4; max-width: 32ch; }
   .step a { font-weight: 600; }
 
   /* edição do mês */
@@ -417,22 +413,23 @@ const linhas = [
   .rua-item { display: grid; gap: 12px; rotate: var(--tilt); transition: rotate 0.4s var(--ease-spring), transform 0.4s var(--ease-spring); }
   .rua-item:hover { rotate: 0deg; transform: scale(1.03); }
   .rua-item a { display: block; box-shadow: 0 2px 0 rgb(0 0 0 / 0.1), 0 18px 30px -16px rgb(0 0 0 / 0.55); }
-  .rua-item img { width: 100%; aspect-ratio: 1 / 1.414; object-fit: cover; }
+  .rua-item img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; }
   .rua-local { font-family: var(--font-display); font-weight: 700; font-size: var(--step--1); }
   .rua-local::before { content: '✶ '; color: var(--magenta); }
   .rua-btns { margin-top: clamp(32px, 5vw, 56px); }
 
   /* parceiros */
   .parceiros-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 6vw, 96px); align-items: center; }
+  .parceiros-title, .social-text { --box-topo: 0em; --box-base: 0em; }
   .parceiros-title { font-family: var(--font-text); font-weight: 300; font-size: var(--step-4); line-height: 1.18; letter-spacing: -0.01em; margin-bottom: 24px; }
-  .parceiros-text { font-size: var(--step-1); line-height: 1.4; font-weight: 300; max-width: 40ch; }
+  .parceiros-text { font-family: var(--font-editorial); font-size: var(--step-1); line-height: 1.4; max-width: 40ch; }
   .parceiros-list { display: grid; gap: 14px; }
 
   /* redes */
   .social { overflow: hidden; }
   .social-inner { position: relative; padding-block: clamp(72px, 11vw, 150px); display: grid; justify-items: start; gap: 22px; }
   .social-inner :global(.social-star) { position: absolute; width: clamp(280px, 40vw, 560px); right: -8%; top: 50%; translate: 0 -50%; z-index: -1; opacity: 0.9; }
-  .social-title { font-size: clamp(3rem, 1.2rem + 8vw, 9rem); letter-spacing: -0.05em; line-height: 0.9; }
+  .social-title { font-size: clamp(2.4rem, 0.8rem + 7.4vw, 8.4rem); letter-spacing: -0.05em; line-height: 0.9; }
   .social-title a { text-decoration: none; }
   .social-title a:hover { text-decoration: underline; text-decoration-thickness: 0.06em; }
   .social-text { font-size: var(--step-1); line-height: 1.45; max-width: 36ch; }

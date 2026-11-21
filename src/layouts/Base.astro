@@ -5,6 +5,9 @@ import '@fontsource/zilla-slab/latin-300.css';
 import '@fontsource/zilla-slab/latin-300-italic.css';
 import '@fontsource/zilla-slab/latin-400.css';
 import '@fontsource/zilla-slab/latin-600.css';
+import '@fontsource/tinos/latin-400.css';
+import '@fontsource/tinos/latin-400-italic.css';
+import '@fontsource/tinos/latin-700.css';
 import '../styles/global.css';
 import archivoWoff2 from '@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2?url';
 import Header from '../components/Header.astro';
@@ -29,7 +32,7 @@ const ogUrl = new URL(og, Astro.site);
 ---
 
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" class:list={{ 'fontes-adobe': site.adobeFonts }}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -39,7 +42,14 @@ const ogUrl = new URL(og, Astro.site);
     <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
     <link rel="sitemap" href={url('/sitemap-index.xml')} />
     <meta name="theme-color" content="#E6007E" />
-    <link rel="preload" href={archivoWoff2} as="font" type="font/woff2" crossorigin />
+    {site.adobeFonts ? (
+      <>
+        <link rel="preconnect" href="https://use.typekit.net" crossorigin />
+        <link rel="stylesheet" href={`https://use.typekit.net/${site.adobeFonts}.css`} />
+      </>
+    ) : (
+      <link rel="preload" href={archivoWoff2} as="font" type="font/woff2" crossorigin />
+    )}
 
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="pt_BR" />

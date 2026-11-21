@@ -1,14 +1,53 @@
 [
-  { "id": "lambe-01", "titulo": "Ideias ganham forma. Perspectivas ganham mundo.", "variante": "ideias", "ponto": "largo-da-ordem", "edicao": 1 },
-  { "id": "lambe-02", "titulo": "Questionar o que parece inquestionável.", "variante": "questionar", "ponto": "rua-sao-francisco", "edicao": 1 },
-  { "id": "lambe-03", "titulo": "Nenhum conhecimento se constrói sozinho.", "variante": "nenhum", "ponto": "trajano-reis", "edicao": 1 },
-  { "id": "lambe-04", "titulo": "Conhecimento não precisa ficar preso a uma só forma.", "variante": "forma", "ponto": "praca-tiradentes", "edicao": 2 },
-  { "id": "lambe-05", "titulo": "Por que entrelinhas?", "variante": "porque", "ponto": "passeio-publico", "edicao": 2 },
-  { "id": "lambe-06", "titulo": "O que mais podemos descobrir quando mudamos o olhar?", "variante": "olhar", "ponto": "rua-sao-francisco", "edicao": 2 },
-  { "id": "lambe-07", "titulo": "Outras formas de pensar, criar e compartilhar conhecimento.", "variante": "explosao", "ponto": "boca-maldita", "edicao": 3 },
-  { "id": "lambe-08", "titulo": "Ideias não surgem do nada. Conhecimento também não.", "variante": "nada", "ponto": "praca-rui-barbosa", "edicao": 3 },
-  { "id": "lambe-09", "titulo": "Questionar o que parece inquestionável.", "variante": "questionar", "ponto": "rua-riachuelo", "edicao": 3 },
-  { "id": "lambe-10", "titulo": "Ideias ganham forma. Perspectivas ganham mundo.", "variante": "ideias", "ponto": "trajano-reis", "edicao": 3 },
-  { "id": "lambe-11", "titulo": "Por que entrelinhas?", "variante": "porque", "ponto": "largo-da-ordem", "edicao": 1 },
-  { "id": "lambe-12", "titulo": "Outras formas de pensar, criar e compartilhar conhecimento.", "variante": "explosao", "ponto": "praca-tiradentes", "edicao": 2 }
+  {
+    "id": "obra-preciso-dizer-que",
+    "titulo": "Preciso dizer que",
+    "tipo": "obra",
+    "serie": "preciso dizer que.",
+    "imagem": "/lambes/obra-preciso-dizer-que",
+    "alt": "Pintura em pastel oleoso: um rosto em ciano e verde, de boca aberta, sobre fundo vermelho, riscado por linhas brancas."
+  },
+  {
+    "id": "cartaz-preciso-dizer-que",
+    "titulo": "Quantas partes de você foram moldadas para agradar?",
+    "tipo": "cartaz",
+    "serie": "preciso dizer que.",
+    "imagem": "/lambes/cartaz-preciso-dizer-que",
+    "texto": "Aprendemos quando falar, como falar e até o que devemos esconder. Mas quem estabelece os limites da nossa voz?",
+    "alt": "Cartaz em lima e magenta: “Quantas partes de você foram moldadas para agradar? Aprendemos quando falar, como falar e até o que devemos esconder. Mas quem estabelece os limites da nossa voz?” Abaixo, “Acesse! Questione o que ensinaram você a ser” e um QR-Code."
+  },
+  {
+    "id": "obra-o-corpo",
+    "titulo": "O corpo",
+    "tipo": "obra",
+    "serie": "o corpo.",
+    "imagem": "/lambes/obra-o-corpo",
+    "alt": "Pintura em tons de azul: uma figura de pé, dobrada para a frente, com os braços pendendo, sobre um fundo salpicado de pontinhos claros."
+  },
+  {
+    "id": "cartaz-o-corpo",
+    "titulo": "Seu corpo é seu. Mas quem te ensinou a não gostar dele?",
+    "tipo": "cartaz",
+    "serie": "o corpo.",
+    "imagem": "/lambes/cartaz-o-corpo",
+    "texto": "Desde cedo, aprendemos a medir, esconder, corrigir e controlar nossos corpos. Mas de onde vêm essas exigências, e a quem elas servem?",
+    "alt": "Cartaz em azul-claro e ciano: “Seu corpo é seu. Mas quem te ensinou a não gostar dele? Desde cedo, aprendemos a medir, esconder, corrigir e controlar nossos corpos. Mas de onde vêm essas exigências, e a quem elas servem?” Abaixo, “Acesse! Questione o que ensinaram você a aceitar.” e um QR-Code."
+  },
+  {
+    "id": "obra-territorios",
+    "titulo": "Territórios",
+    "tipo": "obra",
+    "serie": "territórios.",
+    "imagem": "/lambes/obra-territorios",
+    "alt": "Pintura em pastel: mulher de cabelo curto roxo e rosto azul, de armadura prateada e espada em punho, com uma estrela magenta no peito, sobre fundo verde."
+  },
+  {
+    "id": "cartaz-territorios",
+    "titulo": "Até onde o feminino pode chegar?",
+    "tipo": "cartaz",
+    "serie": "territórios.",
+    "imagem": "/lambes/cartaz-territorios",
+    "texto": "A história, a política, a guerra e a liderança foram, por muito tempo, associadas ao masculino. Mas quem definiu esses limites, e por que ainda persistem?",
+    "alt": "Cartaz em rosa e lima: “Até onde o feminino pode chegar? A história, a política, a guerra e a liderança foram, por muito tempo, associadas ao masculino. Mas quem definiu esses limites, e por que ainda persistem?” Abaixo, “Acesse! Questione os lugares que disseram não serem seus.” e um QR-Code."
+  }
 ]

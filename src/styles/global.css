@@ -1,7 +1,11 @@
 /* ==========================================================================
    entrelinhas — tokens e estilos globais
-   Para usar as fontes originais da identidade (Alfabet / Jubilat), troque
-   apenas --font-display e --font-text abaixo.
+   Tipografia da identidade:
+     --font-display  títulos ............ Alfabet
+     --font-text     corpo e variações .. Jubilat
+     --font-editorial leitura editorial . Times New Roman (Tinos onde ela não existe)
+   Alfabet e Jubilat vêm da Adobe Fonts (site.adobeFonts em src/data/site.ts);
+   sem o projeto configurado, entram Archivo e Zilla Slab.
    ========================================================================== */
 
 :root {
@@ -20,7 +24,8 @@
   --muro: #e7e4dd;
 
   --font-display: 'Archivo Variable', 'Archivo', 'Helvetica Neue', Arial, sans-serif;
-  --font-text: 'Zilla Slab', 'Roboto Slab', Georgia, 'Times New Roman', serif;
+  --font-text: 'Zilla Slab', 'Roboto Slab', Georgia, serif;
+  --font-editorial: 'Times New Roman', Times, 'Tinos', serif;
 
   /* escala tipográfica fluida */
   --step--1: clamp(0.84rem, 0.8rem + 0.15vw, 0.92rem);
@@ -41,6 +46,16 @@
   --shadow-hard: 5px 5px 0 var(--preto);
 
   color-scheme: light;
+}
+
+/* fontes originais, carregadas do projeto da Adobe Fonts */
+:root.fontes-adobe {
+  --font-display: 'alfabet', 'Helvetica Neue', Arial, sans-serif;
+  --font-text: 'jubilat', Georgia, serif;
+  /* a Alfabet tem muito espaço acima das maiúsculas: sem esse recorte, a faixa
+     colorida (.box) cobre a linha de cima. Textos em Jubilat zeram o recorte. */
+  --box-topo: 0.2em;
+  --box-base: 0.03em;
 }
 
 @media (max-width: 720px) {
@@ -98,6 +113,7 @@ h2 { font-size: var(--step-4); }
 h3 { font-size: var(--step-2); line-height: 1.05; }
 .lead { font-size: var(--step-1); line-height: 1.4; font-weight: 300; }
 .serif { font-family: var(--font-text); }
+.editorial, .prose { font-family: var(--font-editorial); }
 .sans { font-family: var(--font-display); }
 .italic { font-style: italic; }
 .eyebrow {
@@ -123,7 +139,8 @@ h3 { font-size: var(--step-2); line-height: 1.05; }
   padding: 0.06em 0.28em;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
-  background: var(--box-bg, var(--lima));
+  /* fundo em degradê chapado para poder ser recortado no topo e na base */
+  background: linear-gradient(var(--box-bg, var(--lima)) 0 0) 0 var(--box-topo, 0em) / 100% calc(100% - var(--box-topo, 0em) - var(--box-base, 0em)) no-repeat;
   color: var(--box-fg, var(--preto));
 }
 .box--magenta { --box-bg: var(--magenta); --box-fg: var(--branco); }
