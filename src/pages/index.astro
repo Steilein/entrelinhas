@@ -24,7 +24,7 @@ const expositores = pontos.filter((p) => p.data.tipo === 'expositor').length;
 const linhas = [
   { texto: 'Porque nem tudo está dito.', oculto: 'quem decide o que pode ser dito?' },
   { texto: 'Nem tudo está visível.', oculto: 'o cuidado que ninguém conta como trabalho' },
-  { texto: 'E nem tudo que aprendemos', oculto: '“menina não senta assim”' },
+  { texto: 'E nem tudo que aprendemos', oculto: 'Existem regras que ninguém lembra de ter criado.' },
   { texto: 'precisa permanecer como está.', oculto: 'a quem serve o padrão?' },
 ];
 ---
@@ -89,7 +89,7 @@ const linhas = [
         <li class="step reveal">
           <span class="step-n step-n--dark"><Starburst seed={32} points={14} fill="var(--lima)" /><span>2</span></span>
           <h3>Pegue o seu. É grátis.</h3>
-          <p>Os livretos ficam nos expositores. Leve um e deixe os outros circularem.</p>
+          <p>Os livretos ficam nos <a href={url('/galeria#distribuicao')}>expositores</a>. Leve um e deixe os outros circularem.</p>
         </li>
         <li class="step reveal">
           <span class="step-n step-n--dark"><Starburst seed={33} points={14} fill="var(--ciano)" /><span>3</span></span>

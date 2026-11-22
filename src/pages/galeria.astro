@@ -7,17 +7,20 @@ import { site } from '../data/site';
 import { url } from '../lib/url';
 import fotos from '../data/fotos.json';
 import rua from '../data/rua.json';
+import expositores from '../data/expositores.json';
 
 const series = await getGaleria();
 // ordem da navegação no lightbox: obra e cartaz de cada série, em sequência
 const pecas = series.flatMap((s) => [s.obra, s.cartaz]).filter((p) => p !== undefined);
-const lambes = (await getPontos()).filter((p) => p.data.tipo === 'lambe').length;
+const pontos = await getPontos();
+const lambes = pontos.filter((p) => p.data.tipo === 'lambe').length;
+const nExpositores = pontos.length - lambes;
 const tilts = [-2.2, 1.6, 1.4, -1.8, -1.2, 2];
 ---
 
 <Base
   title="Galeria"
-  description="As obras e os cartazes da campanha de lambe-lambes do entrelinhas nos muros de Curitiba, e o ensaio fotográfico do kit da edição 01."
+  description="As obras e os cartazes da campanha de lambe-lambes do entrelinhas nos muros de Curitiba, os expositores nos pontos de distribuição e o ensaio fotográfico do kit da edição 01."
 >
   <section class="gal-hero bg-preto">
     <div class="container gal-hero-inner">
@@ -106,6 +109,24 @@ const tilts = [-2.2, 1.6, 1.4, -1.8, -1.2, 2];
     <p class="muro-note">
       Viu um lambe-lambe do entrelinhas? Fotografe e marque <a href={site.instagram.url} target="_blank" rel="noopener">{site.instagram.usuario}</a>.
     </p>
+  </section>
+
+  <section class="section container distribuicao" id="distribuicao" aria-labelledby="distribuicao-titulo">
+    <div class="ensaio-head">
+      <p class="eyebrow">distribuição</p>
+      <h2 id="distribuicao-titulo">Os <span class="box box--ciano">expositores.</span></h2>
+      <p>É assim que os livretos ficam nos pontos de distribuição: a edição do mês na cesta de cima, o fanzine na de baixo e, no alto, uma placa com QR-Code que leva para este site. É só chegar e levar.</p>
+    </div>
+    <ul class="expo-grid" role="list">
+      {expositores.map((f) => (
+        <li class="expo-item">
+          <a href={url(`/expositores/${f.arquivo}.webp`)} target="_blank" rel="noopener">
+            <img src={url(`/expositores/${f.arquivo}-p.webp`)} alt={f.alt} width="570" height="760" loading="lazy" decoding="async" />
+          </a>
+        </li>
+      ))}
+    </ul>
+    <a class="btn btn--magenta expo-btn" href={url('/mapa?tipo=expositor')}>ver os {nExpositores} expositores no mapa</a>
   </section>
 
   <section class="section container ensaio" aria-labelledby="ensaio-titulo">
@@ -236,7 +257,12 @@ const tilts = [-2.2, 1.6, 1.4, -1.8, -1.2, 2];
   .ensaio-item a { display: block; height: 100%; overflow: hidden; border-radius: 4px; outline-offset: 3px; }
   .ensaio-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s var(--ease-out); }
   .ensaio-item a:hover img { transform: scale(1.04); }
-  .na-rua { padding-bottom: 0; }
+  .na-rua, .distribuicao { padding-bottom: 0; }
+  .expo-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .expo-item a { display: block; overflow: hidden; border-radius: 4px; outline-offset: 3px; }
+  .expo-item img { width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; transition: transform 0.5s var(--ease-out); }
+  .expo-item a:hover img { transform: scale(1.04); }
+  .expo-btn { margin-top: clamp(24px, 3vw, 36px); }
   .muro-note { margin-top: clamp(28px, 4vw, 44px); font-weight: 300; max-width: 70ch; }
   .muro-note a { font-weight: 600; }
 
@@ -273,6 +299,20 @@ const tilts = [-2.2, 1.6, 1.4, -1.8, -1.2, 2];
     .serie--inversa .serie-pecas { order: 0; }
     .serie-texto { order: -1; }
     .leve { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 640px) {
+    .expo-grid {
+      grid-template-columns: none;
+      grid-auto-flow: column;
+      grid-auto-columns: 78%;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--gutter);
+      margin-inline: calc(var(--gutter) * -1);
+      padding-inline: var(--gutter);
+      scrollbar-width: none;
+    }
+    .expo-item { scroll-snap-align: start; }
   }
   @media (max-width: 760px) {
     .lb-inner { grid-template-columns: 1fr; }

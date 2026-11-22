@@ -4,8 +4,9 @@ Gera:
   public/lambes/<id>.webp e <id>-p.webp   as seis peças da campanha (três obras + três cartazes)
   public/rua/<nome>.webp e <nome>-p.webp  imagens da campanha aplicada na rua
   public/fotos/<nome>.webp e <nome>-p.webp ensaio fotográfico editado (substitui o anterior)
+  public/expositores/<nome>.webp e <nome>-p.webp  simulações do expositor nos pontos de distribuição
 
-Os textos (títulos, alt) ficam em src/data/galeria.json, rua.json e fotos.json.
+Os textos (títulos, alt) ficam em src/data/galeria.json, rua.json, fotos.json e expositores.json.
 
 Uso (na pasta do site): python tools/importar-galeria.py
 """
@@ -17,7 +18,7 @@ from PIL import Image, ImageOps
 
 DRIVE = 'C:/Helena/Site/Drive/'
 PUB = 'public/'
-for d in ('lambes', 'rua', 'fotos'):
+for d in ('lambes', 'rua', 'fotos', 'expositores'):
     os.makedirs(PUB + d, exist_ok=True)
 
 
@@ -68,6 +69,13 @@ for caminho in rua:
     nome = os.path.splitext(os.path.basename(caminho))[0].lower()
     salvar(abrir(caminho), PUB + 'rua/' + nome, 1400, 760)
 print('na rua:', len(rua))
+
+# ---------- distribuição ----------
+expositores = sorted(glob.glob(DRIVE + 'imagens expositores/NANO*'))
+for caminho in expositores:
+    nome = os.path.splitext(os.path.basename(caminho))[0].lower()
+    salvar(abrir(caminho), PUB + 'expositores/' + nome, 1400, 760)
+print('distribuição:', len(expositores))
 
 # ---------- ensaio ----------
 for antigo in glob.glob(PUB + 'fotos/*.webp'):

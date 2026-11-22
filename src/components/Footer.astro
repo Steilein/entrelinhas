@@ -48,9 +48,6 @@ const parceiros = (await getCollection('parceiros')).sort((a, b) => a.data.ordem
     </div>
 
     <div class="footer-bottom">
-      <p>
-        Projeto de conclusão de curso em {site.credito.curso} ({site.credito.instituicao}) de {site.credito.autora}, {site.credito.ano}.
-      </p>
       {site.conteudoIlustrativo && (
         <p class="footer-note">Pontos, edições e imagens deste site são ilustrativos enquanto o projeto está em desenvolvimento.</p>
       )}

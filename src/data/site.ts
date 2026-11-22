@@ -10,17 +10,12 @@ export const site = {
   edicaoAtual: 1,
   totalEdicoes: 6,
   cidade: 'Curitiba',
+  /** Nome exibido no site (a pedido da Helena) e perfil para onde o link aponta. */
   instagram: {
-    usuario: '@ellielikesdsgn',
+    usuario: '@entre_linhas',
     url: 'https://www.instagram.com/ellielikesdsgn/',
   },
   email: 'entre.linhas@gmail.com',
-  credito: {
-    autora: 'Helena Arioli',
-    curso: 'Design',
-    instituicao: 'PUCPR',
-    ano: 2026,
-  },
   /** `true` exibe o aviso de protótipo (mapa e rodapé). Desligado a pedido da Helena em nov/2026. */
   conteudoIlustrativo: false,
   /**
