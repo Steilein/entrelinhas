@@ -46,6 +46,10 @@ const edicoes = defineCollection({
     pdf: z.string().optional(),
     /** Imagem da capa real (ex.: /edicoes/01/capa.webp). Sem ela, o site desenha a capa. */
     capa: z.string().optional(),
+    /** Pergunta do “Sua vez!” no fim do livreto, repetida na página /sua-vez. */
+    pergunta: z.string().optional(),
+    /** Página do “Sua vez!” no leitor (a capa é a 1), para o link “ver no livreto”. */
+    suaVezPagina: z.number().int().positive().optional(),
     paginas: z.array(pagina).default([]),
   }),
 });
@@ -81,4 +85,24 @@ const parceiros = defineCollection({
   }),
 });
 
-export const collections = { pontos, edicoes, galeria, parceiros };
+const hora = z.string().regex(/^\d{2}:\d{2}$/);
+
+/** Rodas de conversa mediadas pelos coletivos parceiros (datas fictícias, a pedido da Helena). */
+const rodas = defineCollection({
+  loader: file('src/data/rodas.json'),
+  schema: z.object({
+    data: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    inicio: hora,
+    fim: hora,
+    titulo: z.string(),
+    descricao: z.string(),
+    /** Edição que a roda discute (opcional: rodas abertas não têm). */
+    edicao: z.number().int().min(1).max(6).optional(),
+    /** IDs de src/data/parceiros.json. */
+    coletivos: z.array(z.string()).min(1),
+    /** ID de um ponto de src/data/pontos.json. */
+    ponto: z.string(),
+  }),
+});
+
+export const collections = { pontos, edicoes, galeria, parceiros, rodas };

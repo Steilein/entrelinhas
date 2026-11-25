@@ -1,6 +1,6 @@
 /**
  * Gera as imagens de compartilhamento (1200×630) no build:
- * /og/site.png e uma por edição (/og/<id-da-edicao>.png).
+ * /og/site.png, /og/sua-vez.png, /og/rodas.png e uma por edição (/og/<id-da-edicao>.png).
  */
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { readFile } from 'node:fs/promises';
@@ -40,8 +40,26 @@ export const getStaticPaths = (async () => {
     estrela: 'lima',
     seed: 7,
   };
+  const suaVez: Card = {
+    cor: 'magenta',
+    topo: 'entrelinhas · sua vez',
+    titulo: 'Sua vez! O que ficou com você?',
+    sub: 'Responda à pergunta da edição e leia o mural.',
+    estrela: 'lima',
+    seed: 41,
+  };
+  const rodas: Card = {
+    cor: 'lima',
+    topo: 'entrelinhas · rodas de conversa',
+    titulo: 'Conhecimento se constrói em roda.',
+    sub: 'Rodas gratuitas com os coletivos parceiros.',
+    estrela: 'magenta',
+    seed: 88,
+  };
   return [
     { params: { slug: 'site' }, props: { card: site } },
+    { params: { slug: 'sua-vez' }, props: { card: suaVez } },
+    { params: { slug: 'rodas' }, props: { card: rodas } },
     ...edicoes.map((e) => ({
       params: { slug: e.id },
       props: {

@@ -21,6 +21,8 @@ cor: "lima"
 chamada: "Reconhecemos o feminino antes de saber explicá-lo. Esta edição investiga como chegamos às definições que já conhecemos."
 capa: "/edicoes/01/capa.webp"
 pdf: "/edicoes/01/entrelinhas-edicao-01.pdf"
+pergunta: "Quem te ensinou a enxergar o feminino em um objeto, uma cor ou um gesto? E se você mudasse essa ideia, o que deixaria de ser feminino, ou passaria a ser?"
+suaVezPagina: 31
 referencias:
   - "Judith Butler — Gender Trouble (1990)"
   - "Teresa de Lauretis — Technologies of Gender (1987)"

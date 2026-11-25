@@ -1,0 +1,89 @@
+[
+  {
+    "id": "2026-11-14-lancamento",
+    "data": "2026-11-14",
+    "inicio": "15:00",
+    "fim": "17:00",
+    "titulo": "Lançamento: quem decidiu o que é ser feminina?",
+    "descricao": "A primeira roda do entrelinhas, no dia em que a edição 01 chegou aos expositores. A conversa parte da pergunta do lambe-lambe e de tudo o que a gente aprendeu a chamar de feminino sem nunca ter escolhido.",
+    "edicao": 1,
+    "coletivos": ["coletivo-marianas", "marcha-mundial-das-mulheres", "coletivo-juntas"],
+    "ponto": "biblioteca-publica"
+  },
+  {
+    "id": "2026-11-28-rosa-e-de-menina",
+    "data": "2026-11-28",
+    "inicio": "15:00",
+    "fim": "17:00",
+    "titulo": "Rosa é de menina? O que aprendemos sem perceber",
+    "descricao": "Cores, brinquedos, roupas e gestos. A partir da edição 01, a roda revisita as primeiras lições de feminino que cada pessoa recebeu, quase sempre sem explicação.",
+    "edicao": 1,
+    "coletivos": ["coletivo-marianas"],
+    "ponto": "memorial-de-curitiba"
+  },
+  {
+    "id": "2026-12-12-quem-cuida",
+    "data": "2026-12-12",
+    "inicio": "15:00",
+    "fim": "17:00",
+    "titulo": "Quem cuida de quem cuida?",
+    "descricao": "Lavar, cozinhar, lembrar, acolher. Partindo da edição 02, uma conversa sobre o trabalho de cuidado: quem faz, quem não vê e o que mudaria se ele fosse contado.",
+    "edicao": 2,
+    "coletivos": ["marcha-mundial-das-mulheres"],
+    "ponto": "casa-leitura-maria-nicolas"
+  },
+  {
+    "id": "2027-01-16-corpo-territorio",
+    "data": "2027-01-16",
+    "inicio": "15:00",
+    "fim": "17:00",
+    "titulo": "Quem decide como um corpo deve ser?",
+    "descricao": "Padrões de beleza, autonomia e o direito de habitar o próprio corpo. Uma roda sobre a edição 03 e sobre quem lucra com a insatisfação.",
+    "edicao": 3,
+    "coletivos": ["coletivo-juntas"],
+    "ponto": "portao-cultural"
+  },
+  {
+    "id": "2027-02-20-quem-fala",
+    "data": "2027-02-20",
+    "inicio": "15:00",
+    "fim": "17:00",
+    "titulo": "Quem fala por nós?",
+    "descricao": "Voz, representação e lugar de fala: quem tem microfone, quem tem palco e quem sempre foi falado pelos outros. A partir da edição 04, o microfone passa de mão em mão.",
+    "edicao": 4,
+    "coletivos": ["coletivo-marianas"],
+    "ponto": "utfpr"
+  },
+  {
+    "id": "2027-03-08-intersecoes",
+    "data": "2027-03-08",
+    "inicio": "19:00",
+    "fim": "21:00",
+    "titulo": "8 de março: nenhuma opressão anda sozinha",
+    "descricao": "No Dia Internacional das Mulheres, a roda parte da edição 05 para pensar como gênero, raça e classe se cruzam na vida de cada pessoa.",
+    "edicao": 5,
+    "coletivos": ["marcha-mundial-das-mulheres", "coletivo-juntas"],
+    "ponto": "ufpr-historico"
+  },
+  {
+    "id": "2027-04-10-artistas",
+    "data": "2027-04-10",
+    "inicio": "15:00",
+    "fim": "17:00",
+    "titulo": "Por que não houve grandes mulheres artistas?",
+    "descricao": "No museu, diante das obras: quem aparece como autora e quem aparece como modelo? Uma roda sobre a edição 06 e a pergunta que Linda Nochlin fez em 1971.",
+    "edicao": 6,
+    "coletivos": ["coletivo-juntas"],
+    "ponto": "mon"
+  },
+  {
+    "id": "2027-04-24-encerramento",
+    "data": "2027-04-24",
+    "inicio": "15:00",
+    "fim": "17:30",
+    "titulo": "Encerramento: o que ainda podemos inventar?",
+    "descricao": "Seis meses, seis edições e muitas respostas no “Sua vez!”. A última roda reúne os três coletivos para ler em conjunto o que o público escreveu e imaginar o que vem depois.",
+    "coletivos": ["coletivo-marianas", "marcha-mundial-das-mulheres", "coletivo-juntas"],
+    "ponto": "paco-da-liberdade"
+  }
+]

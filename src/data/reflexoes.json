@@ -1,0 +1,56 @@
+[
+  {
+    "texto": "Foi minha avó, sem querer. Ela separava as xícaras de florzinha pra mim e as lisas pro meu irmão. Nunca tinha pensado nisso até ler a página das cores. Hoje tomei café na xícara lisa e me senti meio rebelde, o que é engraçado e um pouco triste ao mesmo tempo.",
+    "assinatura": "Luiza",
+    "idade": 23,
+    "origem": "biblioteca-publica",
+    "edicao": 1
+  },
+  {
+    "texto": "Eu achava que gostava de rosa. Continuo gostando. A diferença é que agora eu sei que escolhi.",
+    "idade": 19,
+    "origem": "trajano-reis",
+    "edicao": 1
+  },
+  {
+    "texto": "Peguei o livreto por curiosidade e me pegou a parte do “ninguém precisou explicar”. Lembrei de quando meu pai disse que eu chorava “feito menina”. Ele também aprendeu isso com alguém.",
+    "assinatura": "Rafael",
+    "idade": 27,
+    "origem": "cinemateca",
+    "edicao": 1
+  },
+  {
+    "texto": "Delicadeza. Me ensinaram que era coisa de mulher, mas a pessoa mais delicada que eu conheço é meu tio, que cuida de orquídeas. Se a gente mudasse essa ideia, delicadeza ia ser só um jeito de cuidar das coisas.",
+    "assinatura": "Bia",
+    "idade": 21,
+    "origem": "utfpr",
+    "edicao": 1
+  },
+  {
+    "texto": "O gesto de fechar as pernas. Até hoje, quando sento de perna aberta no ônibus, sinto um olhar. Não sei se é dos outros ou se é o meu.",
+    "idade": 25,
+    "origem": "boca-maldita",
+    "edicao": 1
+  },
+  {
+    "texto": "Quem me ensinou foi a propaganda de margarina, a novela das sete e o corredor de brinquedos do mercado. Quem está me desensinando é um livrinho de bolso.",
+    "assinatura": "Jô",
+    "idade": 29,
+    "origem": "portao-cultural",
+    "edicao": 1
+  },
+  {
+    "texto": "Lemos em voz alta, eu e minhas amigas, na escadaria da UFPR. A gente discordou em quase tudo e foi a melhor conversa do semestre.",
+    "assinatura": "Carol",
+    "idade": 20,
+    "origem": "ufpr-historico",
+    "edicao": 1
+  },
+  {
+    "texto": "Pensei no batom. Minha mãe dizia que mulher sem batom parece doente. Talvez o que deixaria de ser feminino fosse a obrigação. O batom podia continuar, mas só para quem quisesse.",
+    "assinatura": "Amanda",
+    "idade": 24,
+    "origem": "digital",
+    "edicao": 1
+  }
+]

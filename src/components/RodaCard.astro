@@ -1,0 +1,138 @@
+---
+import type { Roda, StatusRoda } from '../lib/content';
+import { pad } from '../data/site';
+import { url } from '../lib/url';
+
+interface Props {
+  roda: Roda;
+  status: StatusRoda;
+  /** versão curta (home e "Sua vez!"): sem descrição, logos nem botão de agenda */
+  compact?: boolean;
+}
+
+const { roda, status, compact = false } = Astro.props;
+const rotulo = { passada: 'aconteceu', proxima: 'próxima roda', futura: '' }[status];
+const nomes = roda.coletivos.map((c) => c.data.nome);
+const mediacao = nomes.length > 1 ? `${nomes.slice(0, -1).join(', ')} e ${nomes.at(-1)}` : nomes[0];
+---
+
+<article class:list={['roda', `roda--${status}`, { 'roda--compact': compact }]} data-roda data-fim={roda.termina} id={compact ? undefined : roda.id}>
+  <p class="roda-data">
+    <time datetime={roda.comeca}>
+      <span class="roda-dia">{roda.dia}</span>
+      <span class="roda-mes">{roda.mes} {roda.ano}</span>
+      <span class="roda-hora">{roda.semana} · {roda.horario}</span>
+    </time>
+  </p>
+
+  <div class="roda-corpo">
+    <p class="roda-tags">
+      <span class="roda-status" data-roda-status>{rotulo}</span>
+      {roda.edicao && <span class="roda-ed">edição nº {pad(roda.edicao.data.numero)}</span>}
+    </p>
+    <h3 class="roda-titulo">{compact ? <a href={url(`/rodas#${roda.id}`)}>{roda.titulo}</a> : roda.titulo}</h3>
+    {!compact && <p class="roda-desc">{roda.descricao}</p>}
+    <dl class="roda-meta">
+      <div>
+        <dt>onde</dt>
+        <dd>
+          <a href={url(`/mapa?ponto=${roda.ponto.id}`)}>{roda.ponto.data.nome}</a>
+          {!compact && <span class="roda-end">{roda.ponto.data.endereco}</span>}
+        </dd>
+      </div>
+      <div>
+        <dt>mediação</dt>
+        <dd>{mediacao}</dd>
+      </div>
+    </dl>
+  </div>
+
+  {!compact && (
+    <div class="roda-lado">
+      <ul class="roda-logos" role="list" aria-hidden="true">
+        {roda.coletivos.map((c) => c.data.logo && <li><img src={url(c.data.logo)} alt="" loading="lazy" decoding="async" /></li>)}
+      </ul>
+      <a class="btn btn--sm btn--branco roda-agenda" href={roda.agenda} target="_blank" rel="noopener">
+        salvar na agenda<span class="sr-only">: {roda.titulo}, {roda.dia} de {roda.mes}</span>
+      </a>
+    </div>
+  )}
+</article>
+
+<style>
+  .roda {
+    display: grid;
+    grid-template-columns: 9.5rem minmax(0, 1fr) auto;
+    gap: clamp(16px, 2.6vw, 36px);
+    align-items: start;
+    padding: clamp(18px, 2.4vw, 28px);
+    border: 2px solid var(--preto);
+    border-radius: var(--radius);
+    background: var(--branco);
+    color: var(--preto);
+    transition: opacity 0.3s;
+  }
+  .roda--proxima { background: var(--lima); box-shadow: var(--shadow-hard); }
+  .roda--passada { opacity: 0.62; }
+  .roda--passada .roda-agenda { display: none; }
+  .roda--passada .roda-logos { filter: grayscale(1); }
+
+  .roda-data time { display: grid; gap: 2px; }
+  .roda-dia {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(3rem, 2rem + 3vw, 4.6rem);
+    line-height: 0.8;
+    letter-spacing: -0.05em;
+  }
+  .roda-mes { font-family: var(--font-display); font-weight: 800; font-size: var(--step-1); text-transform: uppercase; letter-spacing: 0.02em; }
+  .roda-hora { font-family: var(--font-display); font-weight: 600; font-size: var(--step--1); }
+
+  .roda-corpo { display: grid; gap: 10px; align-content: start; }
+  .roda-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .roda-tags span {
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.1;
+    padding: 0.32em 0.7em;
+    border-radius: 999px;
+  }
+  .roda-status { background: var(--preto); color: var(--branco); }
+  .roda-status:empty { display: none; }
+  .roda--proxima .roda-status { background: var(--magenta); }
+  .roda-ed { box-shadow: inset 0 0 0 1.5px currentColor; }
+  .roda-titulo { font-size: var(--step-2); line-height: 1.05; }
+  .roda-titulo a { text-decoration: none; }
+  .roda-titulo a:hover { text-decoration: underline; }
+  .roda-desc { font-family: var(--font-editorial); font-size: var(--step-1); line-height: 1.4; max-width: 60ch; }
+  .roda-meta { display: flex; flex-wrap: wrap; gap: 6px 28px; font-size: var(--step--1); }
+  .roda-meta dt { font-family: var(--font-display); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.72rem; }
+  .roda-meta dd { margin: 0; display: grid; font-family: var(--font-display); font-weight: 600; }
+  .roda-meta a { text-underline-offset: 3px; }
+  .roda-end { font-weight: 400; }
+
+  .roda-lado { display: grid; gap: 14px; justify-items: end; }
+  .roda-logos { display: flex; gap: 8px; }
+  .roda-logos img { height: 42px; width: auto; max-width: 64px; object-fit: contain; mix-blend-mode: multiply; }
+
+  /* versão curta */
+  .roda--compact { grid-template-columns: 5.6rem minmax(0, 1fr); gap: 14px; padding: 14px 16px; }
+  .roda--compact .roda-dia { font-size: 2.8rem; }
+  .roda--compact .roda-mes { font-size: 0.95rem; }
+  .roda--compact .roda-hora { font-size: 0.78rem; }
+  .roda--compact .roda-titulo { font-size: var(--step-1); }
+  .roda--compact.roda--proxima { background: var(--branco); box-shadow: 4px 4px 0 var(--preto); }
+
+  .roda:target { outline: 3px solid var(--magenta); outline-offset: 4px; }
+
+  @media (max-width: 760px) {
+    .roda:not(.roda--compact) { grid-template-columns: 1fr; }
+    .roda-data time { grid-template-columns: auto 1fr; align-items: end; column-gap: 12px; }
+    .roda-dia { grid-row: 1 / 3; }
+    .roda-lado { justify-items: start; grid-auto-flow: column; align-items: center; justify-content: space-between; }
+  }
+  @media (max-width: 520px) {
+    .roda--compact { grid-template-columns: 1fr; gap: 10px; }
+  }
+</style>

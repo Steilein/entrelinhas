@@ -1,0 +1,179 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Starburst from '../components/Starburst.astro';
+import Arrow from '../components/Arrow.astro';
+import PartnerCard from '../components/PartnerCard.astro';
+import RodaCard from '../components/RodaCard.astro';
+import { getRodas, statusDasRodas } from '../lib/content';
+import { site } from '../data/site';
+import { url } from '../lib/url';
+
+const rodas = await getRodas();
+const status = statusDasRodas(rodas);
+const parceiros = (await getCollection('parceiros')).sort((a, b) => a.data.ordem - b.data.ordem);
+
+const principios = [
+  { titulo: 'Gratuita e aberta', texto: 'Não precisa de inscrição nem de convite: é só chegar. Vale ir sem conhecer ninguém.', cor: 'var(--magenta)', fg: 'var(--branco)' },
+  { titulo: 'Mediada pelos coletivos', texto: 'Quem conduz são integrantes dos coletivos parceiros, que cuidam do tempo de fala e do acolhimento de quem chega.', cor: 'var(--ciano)', fg: 'var(--preto)' },
+  { titulo: 'A partir da edição do mês', texto: 'Cada roda parte do tema do livreto. Não leu? Tudo bem: os livretos estarão lá.', cor: 'var(--lima)', fg: 'var(--preto)' },
+  { titulo: 'Escuta antes de opinião', texto: 'Ninguém precisa concordar. O combinado é ouvir: é na troca com outros pontos de vista que o conhecimento se amplia.', cor: 'var(--preto)', fg: 'var(--branco)' },
+];
+---
+
+<Base
+  title="Rodas de conversa"
+  description="Rodas de conversa gratuitas promovidas pelos coletivos parceiros do entrelinhas em Curitiba, a partir do tema de cada edição."
+  og={url('/og/rodas.png')}
+>
+  <section class="rodas-hero bg-lima grain">
+    <div class="container rodas-hero-inner">
+      <div class="rodas-hero-text">
+        <p class="eyebrow">rodas de conversa · com os coletivos parceiros</p>
+        <h1>Conhecimento se constrói <span class="box box--magenta">em roda.</span></h1>
+        <p class="rodas-lead">
+          Uma vez por mês, os coletivos que sustentam o entrelinhas abrem uma roda para conversar sobre o tema da edição. Sem palestra e sem resposta certa: um espaço para fazer parte do projeto, trocar com quem pensa diferente e construir conhecimento em conjunto.
+        </p>
+        <a class="btn btn--magenta" href="#agenda">ver a agenda <Arrow /></a>
+      </div>
+      <div class="rodas-fotos">
+        <img class="foto foto--1" src={url('/rodas/roda-1.webp')} alt="Pessoas sentadas em roda no chão de uma galeria de fotografias, conversando." width="1200" height="900" decoding="async" />
+        <img class="foto foto--2" src={url('/rodas/roda-2-p.webp')} alt="Mãos sobre uma mesa coberta de retratos de mulheres desenhados em cores vivas." width="570" height="760" decoding="async" />
+        <Starburst class="rodas-star" seed={88} points={18} fill="var(--magenta)" spin />
+      </div>
+    </div>
+  </section>
+
+  <section class="section container como-roda" aria-labelledby="como-roda-titulo">
+    <div class="como-roda-head">
+      <p class="eyebrow">como é uma roda</p>
+      <h2 id="como-roda-titulo">Ninguém sai do mesmo jeito que chegou.</h2>
+    </div>
+    <ol class="principios" role="list">
+      {principios.map((p, i) => (
+        <li class="principio reveal">
+          <span class="principio-n" aria-hidden="true">
+            <Starburst seed={90 + i} points={14} fill={p.cor} />
+            <span style={`color:${p.fg}`}>{i + 1}</span>
+          </span>
+          <h3>{p.titulo}</h3>
+          <p>{p.texto}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="section agenda bg-cinza" id="agenda" aria-labelledby="agenda-titulo">
+    <div class="container">
+      <div class="agenda-head">
+        <div>
+          <p class="eyebrow">agenda</p>
+          <h2 id="agenda-titulo">Uma roda <span class="box box--lima">por edição.</span></h2>
+        </div>
+        <p>De novembro de 2026 a abril de 2027, sempre em espaços que também recebem os livretos. Todas gratuitas. Salve na sua agenda e chegue uns minutinhos antes.</p>
+      </div>
+      <ol class="agenda-lista" role="list" data-rodas>
+        {rodas.map((r, i) => <li><RodaCard roda={r} status={status[i]} /></li>)}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section container mediacao" aria-labelledby="mediacao-titulo">
+    <div class="mediacao-head">
+      <p class="eyebrow">quem media</p>
+      <h2 id="mediacao-titulo"><span class="box box--ciano">Nenhum conhecimento se constrói sozinho.</span></h2>
+      <p>
+        Os coletivos parceiros tornam viáveis a produção e a distribuição dos livretos. Nas rodas, eles também abrem espaço para que o público se sinta parte do entrelinhas e encontre outras experiências que atravessam os mesmos temas.
+      </p>
+    </div>
+    <div class="mediacao-grid">
+      {parceiros.map((p) => <PartnerCard parceiro={p} />)}
+    </div>
+  </section>
+
+  <section class="rodas-fim" aria-label="Continue participando">
+    <a class="fim-card bg-magenta grain" href={url('/sua-vez')}>
+      <span class="eyebrow">depois da roda</span>
+      <span class="fim-titulo">É sua vez!</span>
+      <span class="fim-texto">Conte o que ficou com você. As reflexões do público alimentam o mural e as próximas rodas.</span>
+      <span class="btn btn--lima">mandar minha reflexão <Arrow /></span>
+    </a>
+    <div class="fim-card bg-preto">
+      <span class="eyebrow">leve uma roda</span>
+      <p class="fim-titulo">Para sua escola ou coletivo.</p>
+      <p class="fim-texto">Quer organizar uma roda do entrelinhas no seu espaço? Escreva pra gente e os coletivos parceiros ajudam a montar.</p>
+      <a class="btn btn--branco" href={`mailto:${site.email}?subject=${encodeURIComponent('Roda de conversa do entrelinhas')}`}>{site.email}</a>
+    </div>
+  </section>
+
+  <script>
+    import { initRodas } from '../scripts/rodas';
+    initRodas();
+  </script>
+</Base>
+
+<style>
+  .rodas-hero { border-bottom: 2px solid var(--preto); overflow: hidden; }
+  .rodas-hero-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: clamp(32px, 5vw, 80px);
+    align-items: center;
+    padding-block: clamp(48px, 8vw, 120px);
+  }
+  .rodas-hero-text { display: grid; gap: 22px; justify-items: start; }
+  .rodas-hero h1 { font-size: clamp(2.5rem, 1rem + 5.4vw, 6.4rem); letter-spacing: -0.045em; max-width: 12ch; }
+  .rodas-hero h1 .box { line-height: 1.12; }
+  .rodas-lead { font-family: var(--font-editorial); font-size: var(--step-1); line-height: 1.4; max-width: 44ch; }
+
+  .rodas-fotos { position: relative; aspect-ratio: 1 / 0.95; }
+  .foto { position: absolute; border: 2px solid var(--preto); box-shadow: 10px 12px 0 var(--preto); object-fit: cover; }
+  .foto--1 { width: 82%; aspect-ratio: 4 / 3; left: 0; top: 2%; rotate: -3deg; }
+  .foto--2 { width: 44%; aspect-ratio: 3 / 4; right: 0; bottom: 0; rotate: 4deg; }
+  .rodas-fotos :global(.rodas-star) { position: absolute; width: 26%; left: 30%; bottom: -4%; z-index: 1; }
+
+  .como-roda-head { display: grid; gap: 12px; margin-bottom: clamp(32px, 5vw, 56px); }
+  .como-roda-head h2 { max-width: 16ch; }
+  .principios { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(18px, 3vw, 40px); }
+  .principio { padding-top: 8px; border-top: 2px solid var(--preto); }
+  .principio-n { position: relative; display: grid; place-items: center; width: 84px; height: 84px; margin: 16px 0 12px -6px; }
+  .principio-n :global(svg) { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .principio-n span { position: relative; font-family: var(--font-display); font-weight: 900; font-size: 2rem; }
+  .principio h3 { margin-bottom: 8px; font-size: var(--step-1); line-height: 1.1; }
+  .principio p { font-family: var(--font-editorial); font-size: var(--step-1); line-height: 1.4; }
+
+  .agenda { border-block: 2px solid var(--preto); }
+  .agenda-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 18px 48px; margin-bottom: clamp(32px, 5vw, 56px); }
+  .agenda-head .eyebrow { margin-bottom: 12px; }
+  .agenda-head h2 .box { line-height: 1.15; }
+  .agenda-head > p { max-width: 44ch; font-family: var(--font-editorial); font-size: var(--step-1); line-height: 1.4; }
+  .agenda-lista { display: grid; gap: 14px; }
+  .agenda-lista li { scroll-margin-top: calc(var(--header-h) + 24px); }
+
+  .mediacao-head { display: grid; gap: 18px; max-width: 62ch; margin-bottom: clamp(32px, 5vw, 56px); }
+  .mediacao-head h2 { --box-topo: 0em; --box-base: 0em; font-family: var(--font-text); font-weight: 300; font-size: var(--step-4); line-height: 1.18; letter-spacing: -0.01em; }
+  .mediacao-head p:not(.eyebrow) { font-family: var(--font-editorial); font-size: var(--step-1); line-height: 1.45; }
+  .mediacao-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+  .mediacao-grid :global(.partner) { grid-template-columns: 1fr; align-items: start; }
+
+  .rodas-fim { display: grid; grid-template-columns: 1fr 1fr; border-top: 2px solid var(--preto); }
+  .fim-card { display: grid; gap: 16px; align-content: start; justify-items: start; padding: clamp(40px, 7vw, 96px) var(--gutter); text-decoration: none; }
+  .fim-titulo { font-family: var(--font-display); font-weight: 800; font-size: var(--step-4); line-height: 0.98; letter-spacing: -0.03em; }
+  .fim-texto { font-family: var(--font-editorial); font-size: var(--step-1); line-height: 1.4; max-width: 36ch; }
+  a.fim-card .btn { margin-top: 8px; }
+  a.fim-card:hover .btn { transform: translate(-3px, -3px); box-shadow: var(--shadow-hard); }
+  .fim-card .btn { white-space: normal; }
+
+  @media (max-width: 1000px) {
+    .principios { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 860px) {
+    .rodas-hero-inner { grid-template-columns: 1fr; }
+    .rodas-fotos { width: min(100%, 520px); margin-inline: auto; }
+    .mediacao-grid, .rodas-fim { grid-template-columns: 1fr; }
+    .mediacao-grid :global(.partner) { grid-template-columns: auto 1fr; align-items: center; }
+  }
+  @media (max-width: 520px) {
+    .principios { grid-template-columns: 1fr; }
+  }
+</style>

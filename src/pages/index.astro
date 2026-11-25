@@ -8,7 +8,8 @@ import EditionCover from '../components/EditionCover.astro';
 import Marquee from '../components/Marquee.astro';
 import RevealLines from '../components/RevealLines.astro';
 import PartnerCard from '../components/PartnerCard.astro';
-import { getPontos, getEdicoes } from '../lib/content';
+import RodaCard from '../components/RodaCard.astro';
+import { getPontos, getEdicoes, getRodas, statusDasRodas } from '../lib/content';
 import { frases, pad, rotuloStatus, site } from '../data/site';
 import { url } from '../lib/url';
 import rua from '../data/rua.json';
@@ -20,6 +21,12 @@ const parceiros = (await getCollection('parceiros')).sort((a, b) => a.data.ordem
 const atual = edicoes.find((e) => e.status === 'atual') ?? edicoes[0];
 const lancadas = edicoes.filter((e) => e.status !== 'em-breve').length;
 const expositores = pontos.filter((p) => p.data.tipo === 'expositor').length;
+const rodas = await getRodas();
+const statusRodas = statusDasRodas(rodas);
+// sem JavaScript, valem as duas próximas rodas na data do build (src/scripts/rodas.ts refaz no navegador)
+const proximas = rodas.map((_, i) => i).filter((i) => statusRodas[i] !== 'passada').slice(0, 2);
+// a pergunta do "Sua vez!" da edição mais recente que tem uma (só a primeira frase, para caber no card)
+const perguntaSuaVez = edicoes.filter((e) => e.status !== 'em-breve' && e.data.pergunta).at(-1)?.data.pergunta?.match(/^[^?]*\?/)?.[0];
 
 const linhas = [
   { texto: 'Porque nem tudo está dito.', oculto: 'quem decide o que pode ser dito?' },
@@ -94,7 +101,7 @@ const linhas = [
         <li class="step reveal">
           <span class="step-n step-n--dark"><Starburst seed={33} points={14} fill="var(--ciano)" /><span>3</span></span>
           <h3>Leia, questione, compartilhe.</h3>
-          <p>Todo mês tem edição nova. Perdeu alguma? Leia a <a href={url('/edicoes')}>versão digital</a>.</p>
+          <p>Todo mês tem edição nova. Perdeu alguma? Leia a <a href={url('/edicoes')}>versão digital</a>. Depois, é <a href={url('/sua-vez')}>sua vez</a> de contar o que ficou.</p>
         </li>
       </ol>
     </div>
@@ -192,6 +199,36 @@ const linhas = [
     </div>
   </section>
 
+  <!-- participe: "Sua vez!" e rodas de conversa -->
+  <section class="section participe" aria-labelledby="participe-titulo">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">participe</p>
+        <h2 id="participe-titulo">A conversa não acaba <span class="box box--lima">na última página.</span></h2>
+      </div>
+      <div class="participe-grid">
+        <a class="pt-card pt-card--sv bg-magenta grain" href={url('/sua-vez')}>
+          <span class="pt-label">Sua vez!</span>
+          {perguntaSuaVez && <span class="pt-pergunta"><span class="box box--branco">{perguntaSuaVez}</span></span>}
+          <span class="pt-text">Responda à pergunta da edição e veja o que outras pessoas escreveram no mural.</span>
+          <span class="btn btn--lima pt-btn">mandar minha reflexão <Arrow /></span>
+          <Starburst class="pt-star" seed={45} points={16} fill="var(--lima)" />
+        </a>
+        <div class="pt-card pt-card--rodas bg-lima">
+          <h3 class="pt-label">Rodas de conversa</h3>
+          <p class="pt-text">Todo mês, os coletivos parceiros abrem uma roda sobre o tema da edição. Gratuita e sem inscrição.</p>
+          <ol class="pt-rodas" role="list" data-rodas data-limite="2">
+            {rodas.map((r, i) => (
+              <li hidden={!proximas.includes(i)}><RodaCard roda={r} status={statusRodas[i]} compact /></li>
+            ))}
+          </ol>
+          <p class="pt-text" data-rodas-vazio hidden={proximas.length > 0}>A agenda das próximas rodas sai em breve.</p>
+          <a class="btn btn--magenta pt-btn" href={url('/rodas')}>ver a agenda <Arrow /></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- parceiros -->
   <section class="section parceiros" aria-labelledby="parceiros-titulo">
     <div class="container parceiros-grid">
@@ -221,6 +258,11 @@ const linhas = [
       </div>
     </div>
   </section>
+
+  <script>
+    import { initRodas } from '../scripts/rodas';
+    initRodas();
+  </script>
 </Base>
 
 <style>
@@ -418,6 +460,32 @@ const linhas = [
   .rua-local::before { content: '✶ '; color: var(--magenta); }
   .rua-btns { margin-top: clamp(32px, 5vw, 56px); }
 
+  /* participe */
+  .participe { border-top: 2px solid var(--preto); }
+  .participe-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: clamp(14px, 2vw, 24px); }
+  .pt-card {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: clamp(22px, 3vw, 40px);
+    border: 2px solid var(--preto);
+    border-radius: var(--radius);
+    text-decoration: none;
+  }
+  a.pt-card { transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out); }
+  a.pt-card:hover { transform: translate(-4px, -4px); box-shadow: 8px 8px 0 var(--preto); }
+  .pt-label { position: relative; z-index: 1; font-family: var(--font-display); font-weight: 800; font-size: var(--step-4); line-height: 0.95; letter-spacing: -0.04em; }
+  .pt-pergunta { position: relative; z-index: 1; --box-topo: 0em; --box-base: 0em; font-family: var(--font-editorial); font-weight: 700; font-size: var(--step-2); line-height: 1.22; max-width: 22ch; }
+  .pt-text { position: relative; z-index: 1; font-family: var(--font-editorial); font-size: var(--step-1); line-height: 1.4; max-width: 38ch; }
+  .pt-btn { position: relative; z-index: 1; margin-top: auto; }
+  .pt-card :global(.pt-star) { position: absolute; width: 46%; right: -14%; bottom: -16%; transition: transform 0.8s var(--ease-out); }
+  .pt-card--sv:hover :global(.pt-star) { transform: rotate(40deg); }
+  .pt-rodas { display: grid; gap: 12px; width: 100%; }
+  .pt-card--rodas .pt-label { font-size: var(--step-3); }
+
   /* parceiros */
   .parceiros-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 6vw, 96px); align-items: center; }
   .parceiros-title, .social-text { --box-topo: 0em; --box-base: 0em; }
@@ -447,7 +515,7 @@ const linhas = [
     .destaque-text { justify-self: stretch; }
     .tl { grid-template-columns: repeat(6, minmax(130px, 1fr)); overflow-x: auto; padding: 10px 4px 18px; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); scroll-snap-type: x mandatory; }
     .tl-item { scroll-snap-align: start; }
-    .porque-grid, .parceiros-grid { grid-template-columns: 1fr; }
+    .porque-grid, .parceiros-grid, .participe-grid { grid-template-columns: 1fr; }
     .porque-side { position: static; }
     .rua-wall { grid-template-columns: repeat(4, minmax(200px, 1fr)); overflow-x: auto; padding: 12px var(--gutter) 24px; width: 100%; scroll-snap-type: x mandatory; }
     .rua-item { scroll-snap-align: center; }

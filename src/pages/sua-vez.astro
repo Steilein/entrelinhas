@@ -1,0 +1,375 @@
+---
+import Base from '../layouts/Base.astro';
+import Starburst from '../components/Starburst.astro';
+import Arrow from '../components/Arrow.astro';
+import RodaCard from '../components/RodaCard.astro';
+import { getEdicoes, getPontos, getRodas, rotuloOrigem, statusDasRodas } from '../lib/content';
+import { pad } from '../data/site';
+import { url } from '../lib/url';
+import reflexoes from '../data/reflexoes.json';
+
+/*
+ * Protótipo: o formulário não envia nada a um servidor (o site é estático).
+ * Quem marca "pode publicar" vê a própria reflexão no mural, guardada só no navegador
+ * (src/scripts/sua-vez.ts). O mural parte dos exemplos de src/data/reflexoes.json.
+ */
+const edicoes = (await getEdicoes()).filter((e) => e.status !== 'em-breve' && e.data.pergunta);
+const atual = edicoes.at(-1);
+if (!atual) throw new Error('Nenhuma edição lançada tem `pergunta` para o “Sua vez!”.');
+const pontos = await getPontos();
+const expositores = pontos.filter((p) => p.data.tipo === 'expositor');
+const lambes = pontos.filter((p) => p.data.tipo === 'lambe');
+const rodas = await getRodas();
+const statusRodas = statusDasRodas(rodas);
+// sem JavaScript, valem as duas próximas rodas na data do build (src/scripts/rodas.ts refaz no navegador)
+const proximas = rodas.map((_, i) => i).filter((i) => statusRodas[i] !== 'passada').slice(0, 2);
+const livreto = atual.data.suaVezPagina ? url(`/edicoes/${atual.id}#p=${atual.data.suaVezPagina}`) : url(`/edicoes/${atual.id}`);
+const paginaImpressa = atual.data.suaVezPagina ? atual.data.suaVezPagina - 1 : undefined;
+
+const cores = ['branco', 'lima', 'ciano', 'magenta'];
+const tilts = [-1.4, 1, -0.6, 1.6, -1, 0.7];
+const notas = reflexoes.map((r, i) => ({
+  ...r,
+  assinatura: [r.assinatura, r.idade && `${r.idade} anos`].filter(Boolean).join(', ') || 'sem assinatura',
+  origem: rotuloOrigem(r.origem, pontos),
+  cor: cores[i % cores.length],
+  tilt: tilts[i % tilts.length],
+}));
+---
+
+<Base
+  title="Sua vez!"
+  description="Leu o entrelinhas? Responda à pergunta da edição, conte o que ficou com você e veja o que outras pessoas escreveram."
+  og={url('/og/sua-vez.png')}
+>
+  <section class="sv container" aria-labelledby="sv-titulo">
+    <div class="sv-intro">
+      <p class="eyebrow">edição nº {pad(atual.data.numero)} · {atual.data.titulo}</p>
+      <h1 id="sv-titulo">Sua vez!</h1>
+      <p class="sv-lead">
+        Leu o livreto, cruzou com um lambe-lambe ou folheou a edição digital? Conta pra gente o que ficou com você. As respostas formam o mural e alimentam as rodas de conversa e as próximas edições.
+      </p>
+      <a class="sv-livreto" href={livreto}>
+        <img src={url(`/edicoes/${pad(atual.data.numero)}/p${pad(paginaImpressa ?? 30)}.webp`)} alt="" width="900" height="1200" loading="lazy" decoding="async" />
+        <span>{paginaImpressa ? `a pergunta está na página ${paginaImpressa} do livreto` : 'ver a edição'} <Arrow /></span>
+      </a>
+    </div>
+
+    <div class="sv-folha-wrap">
+      <form class="folha" data-sua-vez>
+        {edicoes.length > 1 ? (
+          <label class="folha-edicao">
+            <span>edição que você leu</span>
+            <select name="edicao">
+              {edicoes.map((e) => (
+                <option value={e.data.numero} data-pergunta={e.data.pergunta} selected={e === atual}>nº {pad(e.data.numero)}: {e.data.titulo}</option>
+              ))}
+            </select>
+          </label>
+        ) : (
+          <input type="hidden" name="edicao" value={atual.data.numero} />
+        )}
+
+        <label for="sv-texto" class="folha-pergunta">
+          <span class="box box--magenta" data-pergunta>{atual.data.pergunta}</span>
+        </label>
+        <textarea
+          id="sv-texto"
+          name="texto"
+          rows="9"
+          maxlength="1200"
+          required
+          placeholder="Escreva aqui, do seu jeito."
+          aria-describedby="sv-contador"
+        ></textarea>
+        <p class="folha-contador" id="sv-contador"><span data-contador>0</span> de 1200 caracteres</p>
+
+        <div class="folha-campos">
+          <label class="campo campo--nome">
+            <span>como você quer assinar? <em>(opcional)</em></span>
+            <input name="assinatura" maxlength="40" autocomplete="nickname" placeholder="nome, apelido ou nada" />
+          </label>
+          <label class="campo campo--idade">
+            <span>idade <em>(opcional)</em></span>
+            <input name="idade" type="number" inputmode="numeric" min="10" max="120" />
+          </label>
+          <label class="campo campo--origem">
+            <span>onde você encontrou o entrelinhas?</span>
+            <select name="origem">
+              <option value="" data-rotulo="">prefiro não dizer</option>
+              <optgroup label="expositores">
+                {expositores.map((p) => <option value={p.id} data-rotulo={rotuloOrigem(p.id, pontos)}>{p.data.nome}</option>)}
+              </optgroup>
+              <optgroup label="lambe-lambes">
+                {lambes.map((p) => <option value={p.id} data-rotulo={rotuloOrigem(p.id, pontos)}>{p.data.nome}</option>)}
+              </optgroup>
+              <option value="digital" data-rotulo={rotuloOrigem('digital', pontos)}>na edição digital</option>
+              <option value="outro" data-rotulo="">em outro lugar</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="folha-check">
+          <input type="checkbox" name="publicar" />
+          <span>Pode publicar minha reflexão no mural, com a assinatura acima.</span>
+        </label>
+
+        <div class="folha-rodape">
+          <p>Curtiu? Manda sua reflexão para nós!</p>
+          <button type="submit" class="folha-enviar">enviar <Arrow /></button>
+        </div>
+      </form>
+
+      <div class="obrigado bg-lima grain" data-obrigado hidden tabindex="-1">
+        <Starburst class="obrigado-star" seed={41} points={16} fill="var(--magenta)" spin />
+        <p class="obrigado-titulo">Valeu por dividir!</p>
+        <p class="obrigado-texto" data-obrigado-texto></p>
+        <div class="btn-row">
+          <a class="btn btn--magenta" href="#mural" data-ver-mural>ver no mural</a>
+          <button type="button" class="btn btn--branco" data-de-novo>escrever outra</button>
+        </div>
+        <p class="obrigado-rodas">Quer continuar a conversa ao vivo? <a href={url('/rodas')}>Veja as rodas de conversa.</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section mural-sec bg-cinza grain" id="mural" aria-labelledby="mural-titulo">
+    <div class="container">
+      <div class="mural-head">
+        <div>
+          <p class="eyebrow">mural</p>
+          <h2 id="mural-titulo">O que ficou <span class="box box--lima">com quem leu.</span></h2>
+        </div>
+        <p>Algumas das reflexões que chegaram pelo “Sua vez!” desde o lançamento da edição {pad(atual.data.numero)}.</p>
+      </div>
+      <ul class="mural" role="list" data-mural>
+        {notas.map((n) => (
+          <li class:list={['nota', `nota--${n.cor}`]} style={`--tilt:${n.tilt}deg`}>
+            <blockquote class="nota-texto"><p>{n.texto}</p></blockquote>
+            <p class="nota-ass">— {n.assinatura}</p>
+            {n.origem && <p class="nota-origem">{n.origem}</p>}
+          </li>
+        ))}
+      </ul>
+      <template data-nota-modelo>
+        <li class="nota nota--sua">
+          <span class="nota-tag">sua reflexão</span>
+          <blockquote class="nota-texto"><p></p></blockquote>
+          <p class="nota-ass"></p>
+          <p class="nota-origem"></p>
+        </li>
+      </template>
+    </div>
+  </section>
+
+  <section class="section container sv-rodas" aria-labelledby="sv-rodas-titulo">
+    <div class="sv-rodas-head">
+      <p class="eyebrow">rodas de conversa</p>
+      <h2 id="sv-rodas-titulo">Continue a conversa <span class="box box--ciano">ao vivo.</span></h2>
+      <p>Todo mês, os coletivos parceiros abrem uma roda sobre o tema da edição. Gratuita e sem inscrição.</p>
+      <a class="btn btn--magenta" href={url('/rodas')}>ver a agenda completa <Arrow /></a>
+    </div>
+    <div>
+      <ol class="sv-rodas-lista" role="list" data-rodas data-limite="2">
+        {rodas.map((r, i) => (
+          <li hidden={!proximas.includes(i)}>
+            <RodaCard roda={r} status={statusRodas[i]} compact />
+          </li>
+        ))}
+      </ol>
+      <p class="sv-rodas-vazio" data-rodas-vazio hidden={proximas.length > 0}>A agenda das próximas rodas sai em breve.</p>
+    </div>
+  </section>
+
+  <script>
+    import { initSuaVez } from '../scripts/sua-vez';
+    import { initRodas } from '../scripts/rodas';
+    initSuaVez();
+    initRodas();
+  </script>
+</Base>
+
+<style>
+  /* ---------- topo: título + folha ---------- */
+  .sv {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.25fr);
+    gap: clamp(28px, 5vw, 80px);
+    align-items: start;
+    padding-block: clamp(32px, 6vw, 88px) clamp(56px, 8vw, 110px);
+  }
+  .sv-intro { display: grid; gap: 20px; justify-items: start; position: sticky; top: calc(var(--header-h) + 28px); }
+  .sv h1 { font-size: clamp(3.4rem, 1.6rem + 7vw, 8.4rem); letter-spacing: -0.05em; line-height: 0.9; }
+  .sv-lead { font-family: var(--font-editorial); font-size: var(--step-1); line-height: 1.4; max-width: 38ch; }
+  .sv-livreto { display: grid; grid-template-columns: 92px auto; gap: 16px; align-items: center; margin-top: 8px; text-decoration: none; }
+  .sv-livreto img { width: 92px; border: 2px solid var(--preto); box-shadow: 5px 5px 0 var(--preto); rotate: -4deg; transition: rotate 0.4s var(--ease-spring); }
+  .sv-livreto:hover img { rotate: 0deg; }
+  .sv-livreto span { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.5em; font-family: var(--font-display); font-weight: 700; font-style: italic; max-width: 22ch; line-height: 1.2; }
+  .sv-livreto :global(.arrow) { width: 1.8em; transition: transform 0.25s var(--ease-out); }
+  .sv-livreto:hover :global(.arrow) { transform: translateX(4px); }
+
+  /* a folha imita a página "Sua vez!" do livreto: pergunta em tarja, pautas e a faixa magenta */
+  .folha {
+    --linha: 2.4rem;
+    display: grid;
+    gap: 18px;
+    padding: clamp(20px, 3vw, 36px) clamp(20px, 3vw, 36px) 0;
+    background: var(--branco);
+    border: 2px solid var(--preto);
+    border-radius: var(--radius);
+    box-shadow: 10px 10px 0 var(--preto);
+    overflow: hidden;
+  }
+  .folha-pergunta {
+    --box-topo: 0em;
+    --box-base: 0em;
+    font-family: var(--font-editorial);
+    font-weight: 700;
+    font-size: var(--step-2);
+    line-height: 1.2;
+    cursor: text;
+  }
+  .folha-pergunta .box { padding: 0.04em 0.22em; }
+  .folha textarea {
+    display: block;
+    width: 100%;
+    min-height: calc(var(--linha) * 7 + 0.4rem);
+    resize: vertical;
+    padding: 0.4rem 0 0;
+    border: 0;
+    background:
+      repeating-linear-gradient(to bottom, transparent 0 calc(var(--linha) - 2px), var(--preto) calc(var(--linha) - 2px) var(--linha))
+      0 0.4rem / 100% calc(100% - 0.4rem) no-repeat local;
+    font-family: var(--font-editorial);
+    font-size: var(--step-1);
+    line-height: var(--linha);
+    color: var(--preto);
+  }
+  .folha textarea::placeholder { color: rgb(0 0 0 / 0.45); font-style: italic; }
+  .folha textarea:focus-visible { outline: none; box-shadow: none; background-color: rgb(181 205 32 / 0.14); }
+  .folha-contador { justify-self: end; margin-top: -8px; font-family: var(--font-display); font-size: var(--step--1); color: rgb(0 0 0 / 0.62); }
+
+  .folha-campos { display: grid; grid-template-columns: minmax(0, 1fr) 7.5rem; gap: 14px; }
+  .campo--origem { grid-column: 1 / -1; }
+  .campo, .folha-edicao { display: grid; gap: 6px; }
+  .campo > span, .folha-edicao > span { font-family: var(--font-display); font-weight: 700; font-size: var(--step--1); }
+  .campo em { font-weight: 400; font-style: normal; color: rgb(0 0 0 / 0.6); }
+  .folha :is(input:not([type='checkbox']), select) {
+    width: 100%;
+    min-height: 48px;
+    padding: 0.55em 0.8em;
+    border: 2px solid var(--preto);
+    border-radius: var(--radius-sm);
+    background: var(--branco);
+    font-family: var(--font-text);
+  }
+  .folha-check { display: flex; gap: 12px; align-items: flex-start; font-size: var(--step--1); line-height: 1.35; cursor: pointer; }
+  .folha-check input { flex: none; width: 22px; height: 22px; margin-top: 1px; accent-color: var(--magenta); }
+
+  .folha-rodape {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 20px;
+    margin: 6px calc(clamp(20px, 3vw, 36px) * -1) 0;
+    padding: clamp(18px, 2.6vw, 28px) clamp(20px, 3vw, 36px);
+    background: var(--magenta);
+    color: var(--branco);
+  }
+  .folha-rodape p { font-family: var(--font-text); font-weight: 700; font-size: var(--step-2); line-height: 1.08; max-width: 14ch; }
+  /* o quadrado lima da página do livreto vira o botão de enviar */
+  .folha-enviar {
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 6px;
+    width: clamp(108px, 14vw, 140px);
+    aspect-ratio: 1;
+    background: var(--lima);
+    color: var(--preto);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-style: italic;
+    font-size: var(--step-1);
+    transition: transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
+  }
+  .folha-enviar :global(.arrow) { width: 2.2em; }
+  .folha-enviar:hover { transform: translate(-3px, -3px); box-shadow: var(--shadow-hard); }
+  .folha-enviar:active { transform: none; box-shadow: none; }
+
+  .obrigado {
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    gap: 16px;
+    justify-items: start;
+    padding: clamp(28px, 4vw, 48px);
+    border: 2px solid var(--preto);
+    border-radius: var(--radius);
+    box-shadow: 10px 10px 0 var(--preto);
+  }
+  .obrigado[hidden], .folha[hidden], .obrigado .btn[hidden] { display: none; }
+  .obrigado :global(.obrigado-star) { position: absolute; width: 170px; right: -40px; top: -40px; z-index: -1; }
+  .obrigado-titulo { font-family: var(--font-display); font-weight: 800; font-size: var(--step-4); line-height: 0.95; letter-spacing: -0.04em; max-width: 9ch; }
+  .obrigado-texto { font-family: var(--font-editorial); font-size: var(--step-1); line-height: 1.4; max-width: 36ch; }
+  .obrigado-rodas { font-size: var(--step--1); }
+  .obrigado-rodas a { font-weight: 600; }
+
+  /* ---------- mural ---------- */
+  .mural-sec { border-block: 2px solid var(--preto); background-color: var(--muro); }
+  .mural-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 18px 48px; margin-bottom: clamp(32px, 5vw, 56px); }
+  .mural-head .eyebrow { margin-bottom: 12px; }
+  .mural-head h2 .box { line-height: 1.15; }
+  .mural-head > p { max-width: 40ch; font-family: var(--font-editorial); font-size: var(--step-1); line-height: 1.4; }
+  .mural { columns: 3 280px; column-gap: clamp(16px, 2.4vw, 28px); }
+  .nota {
+    position: relative;
+    break-inside: avoid;
+    display: grid;
+    gap: 12px;
+    margin-bottom: clamp(16px, 2.4vw, 28px);
+    padding: clamp(20px, 2.4vw, 28px);
+    border: 2px solid var(--preto);
+    rotate: var(--tilt, 0deg);
+    box-shadow: 0 2px 0 rgb(0 0 0 / 0.1), 0 18px 28px -18px rgb(0 0 0 / 0.55);
+  }
+  .nota--branco { background: var(--branco); }
+  .nota--lima { background: var(--lima); }
+  .nota--ciano { background: var(--ciano); }
+  .nota--magenta { background: var(--magenta); color: var(--branco); }
+  .nota--sua { background: var(--branco); border-style: dashed; rotate: -0.8deg; }
+  .nota-texto p { font-family: var(--font-editorial); font-size: var(--step-1); line-height: 1.38; white-space: pre-line; }
+  .nota-texto p::before { content: '“'; display: block; height: 0.5em; font-family: var(--font-display); font-weight: 900; font-size: 3.4em; line-height: 0.8; }
+  .nota-ass { font-family: var(--font-display); font-weight: 700; }
+  .nota-origem { margin-top: -8px; font-family: var(--font-display); font-size: var(--step--1); opacity: 0.8; }
+  .nota-origem:empty { display: none; }
+  .nota-tag {
+    justify-self: start;
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.3em 0.7em;
+    border-radius: 999px;
+    background: var(--magenta);
+    color: var(--branco);
+  }
+
+  /* ---------- rodas ---------- */
+  .sv-rodas { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: clamp(28px, 5vw, 80px); align-items: start; }
+  .sv-rodas-head { display: grid; gap: 16px; justify-items: start; }
+  .sv-rodas-head h2 .box { line-height: 1.15; }
+  .sv-rodas-head > p:not(.eyebrow) { font-family: var(--font-editorial); font-size: var(--step-1); line-height: 1.4; max-width: 36ch; }
+  .sv-rodas-lista { display: grid; gap: 14px; }
+  .sv-rodas-vazio { font-family: var(--font-editorial); font-size: var(--step-1); }
+
+  @media (max-width: 900px) {
+    .sv, .sv-rodas { grid-template-columns: 1fr; }
+    .sv-intro { position: static; }
+    .sv-livreto { display: none; }
+  }
+  @media (max-width: 480px) {
+    .folha { box-shadow: 6px 6px 0 var(--preto); }
+    .folha-campos { grid-template-columns: minmax(0, 1fr) 6rem; }
+    .folha-rodape p { font-size: var(--step-1); }
+  }
+</style>

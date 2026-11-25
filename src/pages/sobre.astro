@@ -68,6 +68,10 @@ const faq = [
     a: `Todas as edições lançadas ficam disponíveis na <a href="${url('/edicoes')}">versão digital</a>, para ler online.`,
   },
   {
+    q: 'Dá para participar além de ler?',
+    a: `Dá! No fim de cada livreto tem o “Sua vez!”: uma pergunta e um QR-Code que leva para a <a href="${url('/sua-vez')}">página onde você manda sua reflexão</a>. E todo mês os coletivos parceiros promovem <a href="${url('/rodas')}">rodas de conversa</a> gratuitas sobre o tema da edição.`,
+  },
+  {
     q: 'Posso levar o entrelinhas para minha escola ou coletivo?',
     a: `Pode e deve! Escreva para <a href="mailto:${site.email}">${site.email}</a> e a gente conversa.`,
   },
@@ -190,7 +194,7 @@ const faq = [
       <div class="parc-head">
         <p class="eyebrow">parceiros</p>
         <h2 id="parc-titulo"><span class="box box--lima">Nenhum conhecimento se constrói sozinho.</span></h2>
-        <p>O entrelinhas se fortalece no diálogo com coletivos, movimentos e iniciativas que compartilham saberes, experiências e possibilidades de construção. São eles que tornam viáveis a produção e o caminho de cada livreto até você.</p>
+        <p>O entrelinhas se fortalece no diálogo com coletivos, movimentos e iniciativas que compartilham saberes, experiências e possibilidades de construção. São eles que tornam viáveis a produção e o caminho de cada livreto até você, e que promovem as <a href={url('/rodas')}>rodas de conversa</a> onde o público troca com outros pontos de vista.</p>
       </div>
       <div class="parc-grid">
         {parceiros.map((p) => <PartnerCard parceiro={p} />)}
@@ -278,6 +282,7 @@ const faq = [
   .intro-big, .parc-head h2 { --box-topo: 0em; --box-base: 0em; }
   .parc-head h2 { font-family: var(--font-text); font-weight: 300; font-size: var(--step-4); line-height: 1.18; letter-spacing: -0.01em; }
   .parc-head p:not(.eyebrow) { font-family: var(--font-editorial); font-size: var(--step-1); line-height: 1.45; }
+  .parc-head a { font-weight: 600; }
   .parc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
   .parc-grid :global(.partner) { grid-template-columns: 1fr; align-items: start; }
 

@@ -5,6 +5,7 @@ Gera:
   public/rua/<nome>.webp e <nome>-p.webp  imagens da campanha aplicada na rua
   public/fotos/<nome>.webp e <nome>-p.webp ensaio fotográfico editado (substitui o anterior)
   public/expositores/<nome>.webp e <nome>-p.webp  simulações do expositor nos pontos de distribuição
+  public/rodas/<nome>.webp e <nome>-p.webp  fotos que ilustram as rodas de conversa (do Google Doc da Helena)
 
 Os textos (títulos, alt) ficam em src/data/galeria.json, rua.json, fotos.json e expositores.json.
 
@@ -18,7 +19,7 @@ from PIL import Image, ImageOps
 
 DRIVE = 'C:/Helena/Site/Drive/'
 PUB = 'public/'
-for d in ('lambes', 'rua', 'fotos', 'expositores'):
+for d in ('lambes', 'rua', 'fotos', 'expositores', 'rodas'):
     os.makedirs(PUB + d, exist_ok=True)
 
 
@@ -76,6 +77,13 @@ for caminho in expositores:
     nome = os.path.splitext(os.path.basename(caminho))[0].lower()
     salvar(abrir(caminho), PUB + 'expositores/' + nome, 1400, 760)
 print('distribuição:', len(expositores))
+
+# ---------- rodas de conversa ----------
+rodas = sorted(glob.glob(DRIVE + 'imagens rodas/*'))
+for caminho in rodas:
+    nome = os.path.splitext(os.path.basename(caminho))[0].lower()
+    salvar(abrir(caminho), PUB + 'rodas/' + nome, 1400, 760)
+print('rodas:', len(rodas))
 
 # ---------- ensaio ----------
 for antigo in glob.glob(PUB + 'fotos/*.webp'):

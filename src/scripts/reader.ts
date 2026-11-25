@@ -44,10 +44,12 @@ class Reader {
 
     const fromHash = this.pageFromHash();
     if (fromHash) this.current = fromHash;
-    // links na própria página (ex.: <a href="#p=6">) também folheiam
+    // links na própria página (ex.: <a href="#p=6">) também folheiam e trazem o leitor para a vista
     window.addEventListener('hashchange', () => {
       const p = this.pageFromHash();
-      if (p) this.goTo(p);
+      if (!p) return;
+      this.goTo(p);
+      if (!this.isInView()) this.root.scrollIntoView({ block: 'center' });
     });
 
     const mq = matchMedia(BOOK_QUERY);

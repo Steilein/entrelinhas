@@ -14,7 +14,8 @@ const SHOTS = process.env.SHOTS !== '0';
 await mkdir(OUT, { recursive: true });
 
 const pontos = JSON.parse(await readFile('src/data/pontos.json', 'utf8'));
-const paginas = ['/', '/mapa', '/edicoes', '/edicoes/03-corpo-territorio', '/edicoes/05-intersecoes', '/galeria', '/sobre', '/nao-existe'];
+const rodas = JSON.parse(await readFile('src/data/rodas.json', 'utf8'));
+const paginas = ['/', '/mapa', '/edicoes', '/edicoes/03-corpo-territorio', '/edicoes/05-intersecoes', '/galeria', '/sobre', '/rodas', '/sua-vez', '/nao-existe'];
 const viewports = {
   mobile: { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 },
   desktop: { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 },
@@ -188,6 +189,56 @@ for (const kind of ['desktop', 'mobile']) {
   await page.click('.menu-btn');
   ok('celular: menu abre', await page.locator('#menu:popover-open').count() === 1);
   if (SHOTS) await page.screenshot({ path: join(OUT, 'mobile-menu.png') });
+  await ctx.close();
+}
+
+/* ---------- sua vez e rodas ---------- */
+{
+  const { ctx, page, errors } = await newPage('mobile');
+  await page.goto(`${BASE}/sua-vez`, { waitUntil: 'networkidle' });
+  const exemplos = await page.locator('.nota').count();
+  await page.fill('#sv-texto', '   ');
+  await page.click('.folha-enviar');
+  ok('sua vez: não envia folha em branco', await page.locator('[data-obrigado]').isHidden());
+  await page.fill('#sv-texto', 'Aprendi com a minha tia que rosa era de menina.' + String.fromCharCode(10) + 'Hoje discordo.');
+  await page.fill('input[name="assinatura"]', 'Teste QA');
+  await page.selectOption('select[name="origem"]', 'cinemateca');
+  await page.check('input[name="publicar"]');
+  await page.click('.folha-enviar');
+  ok('sua vez: agradece depois de enviar', await page.locator('[data-obrigado]').isVisible());
+  const nota = page.locator('.nota--sua').first();
+  ok('sua vez: a reflexão entra no mural', (await page.locator('.nota').count()) === exemplos + 1 && (await nota.textContent())?.includes('minha tia'));
+  ok('sua vez: assinatura e origem na nota', (await nota.textContent())?.includes('Teste QA') && (await nota.textContent())?.includes('Cinemateca'));
+  if (SHOTS) await page.screenshot({ path: join(OUT, 'mobile-sua-vez-enviado.png') });
+  await page.reload({ waitUntil: 'networkidle' });
+  ok('sua vez: a nota continua depois de recarregar', (await page.locator('.nota--sua').count()) === 1);
+  await page.click('[data-de-novo]').catch(() => {});
+  ok('sua vez: sem erros de JS', errors.length === 0, errors.join(' | '));
+  await ctx.close();
+}
+{
+  // data fixa: 24/11/2026, entre o lançamento (14/11) e a roda de 28/11
+  const { ctx, page } = await newPage('desktop');
+  await page.clock.setFixedTime(new Date('2026-11-24T12:00:00-03:00'));
+  await page.goto(`${BASE}/rodas`, { waitUntil: 'networkidle' });
+  ok('rodas: todas as rodas na agenda', (await page.locator('.agenda-lista .roda').count()) === rodas.length);
+  ok('rodas: lançamento marcado como "aconteceu"', (await page.locator('.roda--passada').count()) === 1);
+  const proxima = page.locator('.roda--proxima');
+  ok('rodas: uma só "próxima roda", a de 28/11', (await proxima.count()) === 1 && (await proxima.getAttribute('data-fim'))?.startsWith('2026-11-28'));
+  const agenda = await proxima.locator('a[href*="calendar.google.com"]').getAttribute('href');
+  ok('rodas: "salvar na agenda" com data e fuso', !!agenda?.includes('20261128T150000') && agenda.includes('America%2FSao_Paulo'), agenda ?? '');
+  await page.clock.setFixedTime(new Date('2026-12-20T12:00:00-03:00'));
+  await page.goto(`${BASE}/`, { waitUntil: 'networkidle' });
+  const visiveis = await page.locator('.pt-rodas li:not([hidden]) .roda').evaluateAll((els) => els.map((e) => e.dataset.fim.slice(0, 10)));
+  ok('home: mostra as duas próximas rodas pela data de quem visita', visiveis.join() === '2027-01-16,2027-02-20', visiveis.join());
+  ok('menu: links para rodas e sua vez', (await page.locator('.nav a[href$="/rodas"], .nav a[href$="/sua-vez"]').count()) === 2);
+  await page.goto(`${BASE}/edicoes/01-o-feminino-nao-vem-de-fabrica`, { waitUntil: 'networkidle' });
+  await page.click('.sua-vez a[href^="#p="]');
+  await page.waitForTimeout(800);
+  // no modo livro a página 31 aparece em par com a 30, e o hash fica com a primeira do par
+  const contador = (await page.textContent('[data-count]')) ?? '';
+  const naVista = await page.locator('[data-reader]').evaluate((r) => r.getBoundingClientRect().top < innerHeight);
+  ok('edição: "ver no livreto" abre a página do Sua vez!', contador.includes('31') && naVista, `${contador} · ${page.url()}`);
   await ctx.close();
 }
 
